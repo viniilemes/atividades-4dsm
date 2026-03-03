@@ -1,0 +1,8 @@
+{
+  "name": "screen",
+  "version": "1.0.0",
+  "main": "um.js",
+  "scripts": {
+    "start": "node um.js"
+  }
+}
