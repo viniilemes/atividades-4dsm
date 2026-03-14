@@ -1,0 +1,18 @@
+# Ignore node modules and common build artifacts for subprojects
+node_modules/
+**/node_modules/
+
+# OS / editor
+.DS_Store
+.vscode/
+
+# Logs
+*.log
+
+# Python venv
+venv/
+.venv/
+
+# Dist/build
+dist/
+build/

@@ -1,0 +1,15 @@
+{
+  "expo": {
+    "name": "Lista1",
+    "slug": "lista1",
+    "version": "1.0.0",
+    "assetBundlePatterns": [
+      "**/*"
+    ],
+    "platforms": [
+      "ios",
+      "android",
+      "web"
+    ]
+  }
+}

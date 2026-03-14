@@ -1,0 +1,14 @@
+# Ignore local and build artifacts
+node_modules/
+dist/
+build/
+
+# Editor/OS
+.vscode/
+.DS_Store
+
+# Logs
+*.log
+
+# Coverage
+coverage/
