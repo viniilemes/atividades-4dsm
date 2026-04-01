@@ -1,0 +1,98 @@
+[
+  {
+    "semester": 1,
+    "course": "Estrutura de Dados",
+    "title": "Introduction to Algorithms",
+    "author": "Thomas H. Cormen",
+    "publisher": "MIT Press",
+    "year": 2009
+  },
+  {
+    "semester": 1,
+    "course": "Estrutura de Dados",
+    "title": "Algorithms Unlocked",
+    "author": "Thomas H. Cormen",
+    "publisher": "MIT Press",
+    "year": 2013
+  },
+  {
+    "semester": 1,
+    "course": "Lógica de Programação",
+    "title": "Code Complete",
+    "author": "Steve McConnell",
+    "publisher": "Microsoft Press",
+    "year": 2004
+  },
+  {
+    "semester": 2,
+    "course": "Banco de Dados",
+    "title": "Database System Concepts",
+    "author": "Abraham Silberschatz",
+    "publisher": "McGraw-Hill",
+    "year": 2010
+  },
+  {
+    "semester": 2,
+    "course": "Banco de Dados",
+    "title": "NoSQL Distilled",
+    "author": "Pramod Sadalage",
+    "publisher": "Addison-Wesley",
+    "year": 2012
+  },
+  {
+    "semester": 2,
+    "course": "Programação Orientada a Objetos",
+    "title": "Design Patterns",
+    "author": "Gang of Four",
+    "publisher": "Addison-Wesley",
+    "year": 1994
+  },
+  {
+    "semester": 3,
+    "course": "Desenvolvimento Web",
+    "title": "You Don't Know JS Yet",
+    "author": "Kyle Simpson",
+    "publisher": "O'Reilly",
+    "year": 2020
+  },
+  {
+    "semester": 3,
+    "course": "Desenvolvimento Web",
+    "title": "Web Performance in Action",
+    "author": "Jeremy Wagner",
+    "publisher": "Manning",
+    "year": 2016
+  },
+  {
+    "semester": 3,
+    "course": "Engenharia de Software",
+    "title": "The Pragmatic Programmer",
+    "author": "David Thomas",
+    "publisher": "Addison-Wesley",
+    "year": 2019
+  },
+  {
+    "semester": 4,
+    "course": "DevOps e Cloud",
+    "title": "The DevOps Handbook",
+    "author": "Gene Kim",
+    "publisher": "IT Revolution Press",
+    "year": 2015
+  },
+  {
+    "semester": 4,
+    "course": "DevOps e Cloud",
+    "title": "Building Microservices",
+    "author": "Sam Newman",
+    "publisher": "O'Reilly",
+    "year": 2015
+  },
+  {
+    "semester": 4,
+    "course": "Segurança da Informação",
+    "title": "The Web Application Hacker's Handbook",
+    "author": "Stuttard and Pinto",
+    "publisher": "Wiley",
+    "year": 2011
+  }
+]
