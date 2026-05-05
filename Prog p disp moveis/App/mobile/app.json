@@ -1,0 +1,42 @@
+import { StatusBar } from 'expo-status-bar';
+import * as SplashScreen from 'expo-splash-screen';
+
+export default {
+  expo: {
+    name: 'App Scholar',
+    slug: 'app-scholar',
+    version: '1.0.0',
+    orientation: 'portrait',
+    icon: './src/assets/icon.png',
+    splash: {
+      image: './src/assets/splash.png',
+      resizeMode: 'contain',
+      backgroundColor: '#4A90E2',
+    },
+    updates: {
+      fallbackToCacheTimeout: 0,
+    },
+    assetBundlePatterns: ['**/*'],
+    ios: {
+      supportsTabletMode: true,
+      buildNumber: '1',
+    },
+    android: {
+      adaptiveIcon: {
+        foregroundImage: './src/assets/adaptive-icon.png',
+        backgroundColor: '#4A90E2',
+      },
+      versionCode: 1,
+      softwareKeyboardLayoutMode: 'pan',
+    },
+    web: {
+      favicon: './src/assets/favicon.png',
+    },
+    plugins: ['expo-font'],
+    extra: {
+      eas: {
+        projectId: 'your-project-id',
+      },
+    },
+  },
+};

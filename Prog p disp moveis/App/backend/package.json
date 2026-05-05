@@ -1,0 +1,29 @@
+{
+  "name": "app-scholar-backend",
+  "version": "1.0.0",
+  "type": "module",
+  "description": "Backend para App Scholar - Gerenciamento Acadêmico",
+  "main": "src/server.js",
+  "scripts": {
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js"
+  },
+  "keywords": [
+    "academia",
+    "boletim",
+    "alunos"
+  ],
+  "author": "Vinícius Lemes",
+  "license": "MIT",
+  "dependencies": {
+    "bcrypt": "^5.1.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "jsonwebtoken": "^9.0.0",
+    "pg": "^8.11.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}

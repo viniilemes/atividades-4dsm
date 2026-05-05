@@ -1,0 +1,126 @@
+### App Scholar - API Requests
+
+## Base URL
+@baseUrl = http://localhost:3000/api
+
+## ===== AUTHENTICATION =====
+
+### Register
+POST {{baseUrl}}/auth/register
+Content-Type: application/json
+
+{
+  "name": "João Silva",
+  "email": "joao@email.com",
+  "password": "senha123"
+}
+
+### Login
+POST {{baseUrl}}/auth/login
+Content-Type: application/json
+
+{
+  "email": "admin@email.com",
+  "password": "123456"
+}
+
+## ===== ALUNOS =====
+
+### List all alunos
+GET {{baseUrl}}/alunos
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### Get aluno by ID
+GET {{baseUrl}}/alunos/1
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### Get aluno by matrícula
+GET {{baseUrl}}/alunos/matricula/MAT001
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### Create aluno (admin only)
+POST {{baseUrl}}/alunos
+Content-Type: application/json
+Authorization: Bearer YOUR_TOKEN_HERE
+
+{
+  "nome": "João Pedro",
+  "matricula": "MAT003",
+  "email": "joao@student.com",
+  "telefone": "(11) 99999-9999",
+  "cpf": "123.456.789-00",
+  "data_nascimento": "2004-05-15"
+}
+
+### Update aluno (admin only)
+PUT {{baseUrl}}/alunos/1
+Content-Type: application/json
+Authorization: Bearer YOUR_TOKEN_HERE
+
+{
+  "nome": "João Silva Updated",
+  "email": "joao.updated@email.com"
+}
+
+### Delete aluno (admin only)
+DELETE {{baseUrl}}/alunos/1
+Authorization: Bearer YOUR_TOKEN_HERE
+
+## ===== DISCIPLINAS =====
+
+### List all disciplinas
+GET {{baseUrl}}/disciplinas
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### Get disciplina by ID
+GET {{baseUrl}}/disciplinas/1
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### Create disciplina (admin only)
+POST {{baseUrl}}/disciplinas
+Content-Type: application/json
+Authorization: Bearer YOUR_TOKEN_HERE
+
+{
+  "nome": "Programação Web",
+  "codigo": "PROG101",
+  "carga_horaria": 60,
+  "professor_id": 1
+}
+
+### Update disciplina (admin only)
+PUT {{baseUrl}}/disciplinas/1
+Content-Type: application/json
+Authorization: Bearer YOUR_TOKEN_HERE
+
+{
+  "nome": "Programação Web Avançada",
+  "carga_horaria": 80
+}
+
+### Delete disciplina (admin only)
+DELETE {{baseUrl}}/disciplinas/1
+Authorization: Bearer YOUR_TOKEN_HERE
+
+## ===== BOLETIM =====
+
+### Get boletim by matrícula
+GET {{baseUrl}}/boletim/MAT001
+Authorization: Bearer YOUR_TOKEN_HERE
+
+### Add/Update grade (admin only)
+POST {{baseUrl}}/boletim/grades
+Content-Type: application/json
+Authorization: Bearer YOUR_TOKEN_HERE
+
+{
+  "aluno_id": 1,
+  "disciplina_id": 1,
+  "nota1": 8.5,
+  "nota2": 7.5
+}
+
+## ===== HEALTH CHECK =====
+
+### Health check
+GET http://localhost:3000/health

@@ -1,0 +1,59 @@
+# .gitignore for App Scholar
+
+# Backend
+backend/node_modules/
+backend/package-lock.json
+backend/.env
+backend/.env.local
+backend/.DS_Store
+backend/dist/
+
+# Mobile
+mobile/node_modules/
+mobile/package-lock.json
+mobile/.expo/
+mobile/.expo-shared/
+mobile/dist/
+mobile/.DS_Store
+mobile/assets/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+*.sublime-project
+*.sublime-workspace
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Dependencies
+package-lock.json
+yarn.lock
+
+# Environment
+.env
+.env.local
+.env.*.local
+
+# Misc
+.cache/
+.next/
+out/
+build/
+dist/
