@@ -315,7 +315,7 @@ mediaGeral = Σ(médias) / quantidade_disciplinas
 - `GET /api/boletim/:matricula` - Consultar boletim
 - `POST /api/boletim/grades` - Adicionar/atualizar nota (admin)
 
----
+-----
 
 ## 🎨 Design Patterns
 
