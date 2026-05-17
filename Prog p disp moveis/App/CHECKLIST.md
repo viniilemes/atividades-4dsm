@@ -32,6 +32,13 @@
 - [x] disciplinas/repository.js
 - [x] disciplinas/routes.js
 
+## 🌐 Módulo Localização (APIs Externas)
+
+- [x] externalApis.js (ViaCEP + IBGE)
+- [x] localizationController.js
+- [x] localizationRoutes.js
+- [x] CadastroAlunoScreen.js (Mobile)
+
 ## 📊 Módulo Boletim
 
 - [x] boletim/controller.js
@@ -126,6 +133,10 @@
 - [x] Média geral do semestre
 - [x] Lançamento de notas (admin)
 
+### APIs Externas
+- [x] ViaCEP - Auto-preenchimento de endereço
+- [x] IBGE - Dropdowns dinâmicos de Estados/Cidades
+
 ### Interface Mobile
 - [x] Dashboard intuitivo
 - [x] Login/Register com validação
@@ -206,7 +217,7 @@
 
 ---
 
-## 🎉 Projeto Completo!
+## 🎉 Projeto 100% Completo!
 
 Você agora tem:
 
@@ -214,6 +225,7 @@ Você agora tem:
 ✅ Mobile profissional com React Native
 ✅ Autenticação segura com JWT
 ✅ Banco de dados estruturado
+✅ **APIs Externas implementadas (ViaCEP + IBGE)**
 ✅ Documentação completa
 ✅ Exemplos de requisições
 ✅ Setup fácil de reproduzir

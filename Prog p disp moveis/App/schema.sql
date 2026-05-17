@@ -16,8 +16,11 @@ CREATE TABLE alunos (
   matricula VARCHAR(50) UNIQUE NOT NULL,
   email VARCHAR(255) NOT NULL,
   telefone VARCHAR(20),
-  cpf VARCHAR(14),
-  data_nascimento DATE,
+  cep VARCHAR(20),
+  endereco VARCHAR(255),
+  cidade VARCHAR(100),
+  estado VARCHAR(2),
+  curso VARCHAR(255),
   created_at TIMESTAMP DEFAULT NOW(),
   updated_at TIMESTAMP DEFAULT NOW()
 );

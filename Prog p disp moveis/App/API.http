@@ -124,3 +124,19 @@ Authorization: Bearer YOUR_TOKEN_HERE
 
 ### Health check
 GET http://localhost:3000/health
+
+## ===== EXTERNAL APIS (ViaCEP + IBGE) =====
+
+### Search CEP (ViaCEP)
+POST http://localhost:3000/api/localizacao/cep
+Content-Type: application/json
+
+{
+  "cep": "01310100"
+}
+
+### List Estados (IBGE)
+GET http://localhost:3000/api/localizacao/estados
+
+### List Cidades by Estado (IBGE)
+GET http://localhost:3000/api/localizacao/estados/35/cidades

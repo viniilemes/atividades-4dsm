@@ -7,6 +7,7 @@ import BoletimScreen from '../screens/BoletimScreen';
 import AlunosScreen from '../screens/AlunosScreen';
 import DisciplinasScreen from '../screens/DisciplinasScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import CadastroAlunoScreen from '../screens/CadastroAlunoScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -60,6 +61,11 @@ function AlunosStack() {
         name="AlunosMain"
         component={AlunosScreen}
         options={{ title: 'Alunos' }}
+      />
+      <Stack.Screen
+        name="CadastroAluno"
+        component={CadastroAlunoScreen}
+        options={{ title: 'Novo Aluno' }}
       />
     </Stack.Navigator>
   );

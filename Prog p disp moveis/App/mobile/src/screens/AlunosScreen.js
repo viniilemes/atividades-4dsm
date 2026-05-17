@@ -12,7 +12,7 @@ import {
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { alunosService } from '../services/api';
 
-export default function AlunosScreen() {
+export default function AlunosScreen({ navigation }) {
   const [alunos, setAlunos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState('');
@@ -71,17 +71,25 @@ export default function AlunosScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.searchContainer}>
-        <View style={styles.inputContainer}>
-          <MaterialCommunityIcons name="magnify" size={20} color="#666" />
-          <TextInput
-            style={styles.input}
-            placeholder="Buscar por nome ou matrícula"
-            placeholderTextColor="#999"
-            value={searchText}
-            onChangeText={setSearchText}
-          />
+      <View style={styles.headerContainer}>
+        <View style={styles.searchContainer}>
+          <View style={styles.inputContainer}>
+            <MaterialCommunityIcons name="magnify" size={20} color="#666" />
+            <TextInput
+              style={styles.input}
+              placeholder="Buscar por nome ou matrícula"
+              placeholderTextColor="#999"
+              value={searchText}
+              onChangeText={setSearchText}
+            />
+          </View>
         </View>
+        <TouchableOpacity
+          style={styles.addButton}
+          onPress={() => navigation.navigate('CadastroAluno')}
+        >
+          <MaterialCommunityIcons name="plus" size={24} color="#fff" />
+        </TouchableOpacity>
       </View>
 
       {filteredAlunos.length === 0 ? (
@@ -114,12 +122,18 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  searchContainer: {
-    paddingHorizontal: 16,
+  headerContainer: {
+    flexDirection: 'row',
+    paddingHorizontal: 8,
     paddingVertical: 12,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
+    gap: 8,
+    alignItems: 'center',
+  },
+  searchContainer: {
+    flex: 1,
   },
   inputContainer: {
     flexDirection: 'row',
@@ -136,6 +150,14 @@ const styles = StyleSheet.create({
     paddingHorizontal: 8,
     fontSize: 14,
     color: '#333',
+  },
+  addButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#4A90E2',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   listContainer: {
     paddingHorizontal: 12,

@@ -12,15 +12,18 @@ export async function getBoletimService(matricula) {
   const alunoData = boletim[0];
 
   const disciplinas = boletim.map(item => {
-    const media = (item.nota1 + item.nota2) / 2;
+    // Converter notas para números
+    const nota1 = parseFloat(item.nota1) || 0;
+    const nota2 = parseFloat(item.nota2) || 0;
+    const media = (nota1 + nota2) / 2;
     const situation = calculateSituation(media);
 
     return {
       id: item.disciplina_id,
       nome: item.disciplina_nome,
       codigo: item.disciplina_codigo,
-      nota1: item.nota1,
-      nota2: item.nota2,
+      nota1: nota1,
+      nota2: nota2,
       media: parseFloat(media.toFixed(2)),
       situation
     };

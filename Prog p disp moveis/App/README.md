@@ -51,13 +51,9 @@ Aplicativo mobile profissional para gerenciamento acadêmico, permitindo cadastr
 - Determinar situação (Aprovado/Reprovado)
 - Média geral do semestre
 
-### 🎨 Interface
-- Dashboard intuitivo
-- Formulários validados
-- Loading indicators
-- Mensagens de erro/sucesso
-- Design responsivo
-- Bottom tab navigation
+### � Integração com APIs Externas
+- ViaCEP para auto-preenchimento de endereço
+- IBGE para lista dinâmica de estados e cidades
 
 ### 🔐 Segurança
 - Autenticação baseada em JWT
