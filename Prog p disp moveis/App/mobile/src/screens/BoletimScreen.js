@@ -16,6 +16,7 @@ import { AuthContext } from '../context/AuthContext';
 export default function BoletimScreen() {
   const [matricula, setMatricula] = useState('');
   const [boletim, setBoletim] = useState(null);
+  const [editedGrades, setEditedGrades] = useState({});
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const { user } = useContext(AuthContext);
@@ -31,6 +32,12 @@ export default function BoletimScreen() {
     try {
       const response = await boletimService.getByMatricula(matricula);
       setBoletim(response.data);
+      // initialize edited grades map
+      const map = {};
+      response.data.disciplinas.forEach((d) => {
+        map[d.id] = { nota1: String(d.nota1 ?? ''), nota2: String(d.nota2 ?? '') };
+      });
+      setEditedGrades(map);
     } catch (err) {
       setError(err.response?.data?.error || 'Erro ao buscar boletim');
       Alert.alert('Erro', error);
@@ -149,11 +156,39 @@ export default function BoletimScreen() {
                 <View style={styles.notasContainer}>
                   <View style={styles.notaItem}>
                     <Text style={styles.notaLabel}>Nota 1</Text>
-                    <Text style={styles.notaValue}>{disciplina.nota1}</Text>
+                    {user?.role === 'professor' ? (
+                      <TextInput
+                        style={styles.notaInput}
+                        value={editedGrades[disciplina.id]?.nota1}
+                        keyboardType="numeric"
+                        onChangeText={(text) =>
+                          setEditedGrades((prev) => ({
+                            ...prev,
+                            [disciplina.id]: { ...(prev[disciplina.id] || {}), nota1: text },
+                          }))
+                        }
+                      />
+                    ) : (
+                      <Text style={styles.notaValue}>{disciplina.nota1}</Text>
+                    )}
                   </View>
                   <View style={styles.notaItem}>
                     <Text style={styles.notaLabel}>Nota 2</Text>
-                    <Text style={styles.notaValue}>{disciplina.nota2}</Text>
+                    {user?.role === 'professor' ? (
+                      <TextInput
+                        style={styles.notaInput}
+                        value={editedGrades[disciplina.id]?.nota2}
+                        keyboardType="numeric"
+                        onChangeText={(text) =>
+                          setEditedGrades((prev) => ({
+                            ...prev,
+                            [disciplina.id]: { ...(prev[disciplina.id] || {}), nota2: text },
+                          }))
+                        }
+                      />
+                    ) : (
+                      <Text style={styles.notaValue}>{disciplina.nota2}</Text>
+                    )}
                   </View>
                   <View style={styles.notaItem}>
                     <Text style={styles.notaLabel}>Média</Text>
@@ -161,6 +196,33 @@ export default function BoletimScreen() {
                       {disciplina.media.toFixed(2)}
                     </Text>
                   </View>
+                  {user?.role === 'professor' && (
+                    <View style={styles.saveContainer}>
+                      <TouchableOpacity
+                        style={styles.saveButton}
+                        onPress={async () => {
+                          try {
+                            const notas = editedGrades[disciplina.id] || {};
+                            const nota1 = parseFloat(notas.nota1) || 0;
+                            const nota2 = parseFloat(notas.nota2) || 0;
+                            await boletimService.addGrade({
+                              aluno_id: boletim.aluno.id,
+                              disciplina_id: disciplina.id,
+                              nota1,
+                              nota2,
+                            });
+                            Alert.alert('Sucesso', 'Notas salvas');
+                            // refresh boletim
+                            handleFetchBoletim();
+                          } catch (err) {
+                            Alert.alert('Erro', err.response?.data?.error || 'Falha ao salvar notas');
+                          }
+                        }}
+                      >
+                        <Text style={styles.saveButtonText}>Salvar</Text>
+                      </TouchableOpacity>
+                    </View>
+                  )}
                 </View>
               </View>
             ))}
@@ -357,6 +419,32 @@ const styles = StyleSheet.create({
   },
   notaItem: {
     alignItems: 'center',
+  },
+  notaInput: {
+    width: 70,
+    height: 36,
+    backgroundColor: '#fff',
+    borderRadius: 6,
+    borderWidth: 1,
+    borderColor: '#e0e0e0',
+    textAlign: 'center',
+    paddingVertical: 6,
+    paddingHorizontal: 8,
+    color: '#333',
+  },
+  saveContainer: {
+    marginTop: 12,
+    alignItems: 'center',
+  },
+  saveButton: {
+    backgroundColor: '#388E3C',
+    paddingHorizontal: 16,
+    paddingVertical: 8,
+    borderRadius: 8,
+  },
+  saveButtonText: {
+    color: '#fff',
+    fontWeight: '600',
   },
   notaLabel: {
     fontSize: 11,

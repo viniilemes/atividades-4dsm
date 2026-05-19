@@ -7,6 +7,10 @@ import BoletimScreen from '../screens/BoletimScreen';
 import AlunosScreen from '../screens/AlunosScreen';
 import DisciplinasScreen from '../screens/DisciplinasScreen';
 import ProfileScreen from '../screens/ProfileScreen';
+import EditProfileScreen from '../screens/EditProfileScreen';
+import ChangePasswordScreen from '../screens/ChangePasswordScreen';
+import ThemeScreen from '../screens/ThemeScreen';
+import NotificationsScreen from '../screens/NotificationsScreen';
 import CadastroAlunoScreen from '../screens/CadastroAlunoScreen';
 
 const Stack = createNativeStackNavigator();
@@ -102,6 +106,26 @@ function ProfileStack() {
         name="ProfileMain"
         component={ProfileScreen}
         options={{ title: 'Perfil' }}
+      />
+      <Stack.Screen
+        name="EditProfile"
+        component={EditProfileScreen}
+        options={{ title: 'Editar Perfil' }}
+      />
+      <Stack.Screen
+        name="ChangePassword"
+        component={ChangePasswordScreen}
+        options={{ title: 'Alterar Senha' }}
+      />
+      <Stack.Screen
+        name="Theme"
+        component={ThemeScreen}
+        options={{ title: 'Tema' }}
+      />
+      <Stack.Screen
+        name="Notifications"
+        component={NotificationsScreen}
+        options={{ title: 'Notificações' }}
       />
     </Stack.Navigator>
   );

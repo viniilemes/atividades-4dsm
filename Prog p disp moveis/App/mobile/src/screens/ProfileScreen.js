@@ -6,26 +6,35 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  Platform,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { AuthContext } from '../context/AuthContext';
 
 export default function ProfileScreen() {
   const { user, logout } = useContext(AuthContext);
+  const navigation = useNavigation();
 
   const handleLogout = () => {
-    Alert.alert(
-      'Confirmar Saída',
-      'Tem certeza que deseja sair da aplicação?',
-      [
-        { text: 'Cancelar', onPress: () => {} },
-        {
-          text: 'Sair',
-          onPress: logout,
-          style: 'destructive',
-        },
-      ]
-    );
+    const doLogout = async () => {
+      await logout();
+      try {
+        if (typeof window !== 'undefined') window.location.reload();
+      } catch (e) {}
+    };
+
+    if (Platform.OS === 'web') {
+      if (window.confirm('Tem certeza que deseja sair da aplicação?')) {
+        doLogout();
+      }
+      return;
+    }
+
+    Alert.alert('Confirmar Saída', 'Tem certeza que deseja sair da aplicação?', [
+      { text: 'Cancelar', onPress: () => {} },
+      { text: 'Sair', onPress: doLogout, style: 'destructive' },
+    ]);
   };
 
   const menuItems = [
@@ -33,25 +42,25 @@ export default function ProfileScreen() {
       icon: 'account-edit',
       label: 'Editar Perfil',
       color: '#4A90E2',
-      onPress: () => Alert.alert('Info', 'Funcionalidade em desenvolvimento'),
+      onPress: () => navigation.navigate('EditProfile'),
     },
     {
       icon: 'lock-reset',
       label: 'Alterar Senha',
       color: '#FF6B6B',
-      onPress: () => Alert.alert('Info', 'Funcionalidade em desenvolvimento'),
+      onPress: () => navigation.navigate('ChangePassword'),
     },
     {
       icon: 'bell',
       label: 'Notificações',
       color: '#FFA07A',
-      onPress: () => Alert.alert('Info', 'Funcionalidade em desenvolvimento'),
+      onPress: () => navigation.navigate('Notifications'),
     },
     {
       icon: 'moon-waning-crescent',
       label: 'Tema',
       color: '#45B7D1',
-      onPress: () => Alert.alert('Info', 'Funcionalidade em desenvolvimento'),
+      onPress: () => navigation.navigate('Theme'),
     },
   ];
 
@@ -87,7 +96,12 @@ export default function ProfileScreen() {
           <TouchableOpacity
             key={index}
             style={styles.menuItem}
-            onPress={item.onPress}
+            accessibilityRole="button"
+            onPress={() => {
+              // keep current behavior for placeholders
+              if (item.onPress) return item.onPress();
+              return null;
+            }}
           >
             <View style={[styles.menuIconContainer, { backgroundColor: item.color + '20' }]}>
               <MaterialCommunityIcons name={item.icon} size={24} color={item.color} />
@@ -100,9 +114,10 @@ export default function ProfileScreen() {
 
       <View style={styles.logoutContainer}>
         <TouchableOpacity
-          style={styles.logoutButton}
-          onPress={handleLogout}
-        >
+            accessibilityRole="button"
+            style={styles.logoutButton}
+            onPress={handleLogout}
+          >
           <MaterialCommunityIcons name="logout" size={20} color="#fff" />
           <Text style={styles.logoutText}>Sair</Text>
         </TouchableOpacity>

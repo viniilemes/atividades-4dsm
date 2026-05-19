@@ -11,6 +11,8 @@ import {
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { AuthContext } from '../context/AuthContext';
 
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export default function LoginScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -23,8 +25,13 @@ export default function LoginScreen({ navigation }) {
       return;
     }
 
+    if (!emailRegex.test(email.trim())) {
+      Alert.alert('Erro', 'Informe um email válido');
+      return;
+    }
+
     try {
-      await login(email, password);
+      await login(email.trim(), password);
     } catch (error) {
       Alert.alert('Erro de Login', error.message);
     }
@@ -48,6 +55,7 @@ export default function LoginScreen({ navigation }) {
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
+            autoCapitalize="none"
             editable={!loading}
           />
         </View>

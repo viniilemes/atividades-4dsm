@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { AuthProvider } from './src/context/AuthContext';
+import { ThemeProvider } from './src/context/ThemeContext';
 import { Navigation } from './src/routes';
 
 export default function App() {
@@ -9,7 +10,9 @@ export default function App() {
     <>
       <StatusBar barStyle="light-content" backgroundColor="#4A90E2" />
       <AuthProvider>
-        <Navigation />
+        <ThemeProvider>
+          <Navigation />
+        </ThemeProvider>
       </AuthProvider>
     </>
   );

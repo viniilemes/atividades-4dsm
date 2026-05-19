@@ -8,6 +8,7 @@ import alunosRoutes from './modules/alunos/routes.js';
 import disciplinasRoutes from './modules/disciplinas/routes.js';
 import boletimRoutes from './modules/boletim/routes.js';
 import localizationRoutes from './modules/alunos/localizationRoutes.js';
+import professoresRoutes from './modules/professores/routes.js';
 
 dotenv.config();
 
@@ -37,6 +38,7 @@ app.use('/api', alunosRoutes);
 app.use('/api', disciplinasRoutes);
 app.use('/api', boletimRoutes);
 app.use('/api', localizationRoutes);
+app.use('/api', professoresRoutes);
 
 // 404 handler
 app.use((req, res) => {

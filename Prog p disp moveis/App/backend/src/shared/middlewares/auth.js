@@ -30,3 +30,10 @@ export function isStudent(req, res, next) {
   }
   next();
 }
+
+export function isProfessor(req, res, next) {
+  if (req.user?.role !== 'professor') {
+    return res.status(403).json({ error: 'Acesso negado. Professor required.' });
+  }
+  next();
+}

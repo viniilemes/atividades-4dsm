@@ -13,7 +13,7 @@ export function AuthProvider({ children }) {
     setLoading(true);
     setError(null);
     try {
-      const response = await authService.login(email, password);
+      const response = await authService.login(email.trim(), password);
       const { token, user: userData } = response.data;
 
       await AsyncStorage.setItem('authToken', token);
@@ -34,7 +34,7 @@ export function AuthProvider({ children }) {
     setLoading(true);
     setError(null);
     try {
-      const response = await authService.register(name, email, password);
+      const response = await authService.register(name, email.trim(), password);
       const { token, user: userData } = response.data;
 
       await AsyncStorage.setItem('authToken', token);
@@ -84,6 +84,7 @@ export function AuthProvider({ children }) {
         user,
         loading,
         error,
+        setUser,
         login,
         register,
         logout,

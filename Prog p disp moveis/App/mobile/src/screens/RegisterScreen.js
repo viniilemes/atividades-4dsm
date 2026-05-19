@@ -12,6 +12,8 @@ import {
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { AuthContext } from '../context/AuthContext';
 
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export default function RegisterScreen({ navigation }) {
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
@@ -37,8 +39,13 @@ export default function RegisterScreen({ navigation }) {
       return;
     }
 
+    if (!emailRegex.test(email.trim())) {
+      Alert.alert('Erro', 'Informe um email válido');
+      return;
+    }
+
     try {
-      await register(name, email, password);
+      await register(name, email.trim(), password);
     } catch (error) {
       Alert.alert('Erro de Registro', error.message);
     }
@@ -76,6 +83,7 @@ export default function RegisterScreen({ navigation }) {
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
+            autoCapitalize="none"
             editable={!loading}
           />
         </View>

@@ -2,7 +2,7 @@
 CREATE TABLE users (
   id SERIAL PRIMARY KEY,
   name VARCHAR(255) NOT NULL,
-  email VARCHAR(255) UNIQUE NOT NULL,
+  email VARCHAR(255) UNIQUE NOT NULL CHECK (email = LOWER(TRIM(email))),
   password VARCHAR(255) NOT NULL,
   role VARCHAR(50) DEFAULT 'aluno' CHECK (role IN ('admin', 'aluno', 'professor')),
   created_at TIMESTAMP DEFAULT NOW(),
@@ -61,6 +61,7 @@ CREATE TABLE grades (
 
 -- Create indexes for better performance
 CREATE INDEX idx_users_email ON users(email);
+CREATE UNIQUE INDEX idx_users_email_lower ON users(LOWER(email));
 CREATE INDEX idx_alunos_matricula ON alunos(matricula);
 CREATE INDEX idx_alunos_email ON alunos(email);
 CREATE INDEX idx_disciplinas_codigo ON disciplinas(codigo);

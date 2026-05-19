@@ -1,9 +1,9 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
-import { getUserByEmail, createUser } from './repository.js';
+import { getUserByEmail, createUser, getUserById, updateUserById, changeUserPassword } from './repository.js';
 
 export async function loginService(email, password) {
-  const user = await getUserByEmail(email);
+  const user = await getUserByEmail(email?.trim());
 
   if (!user) {
     throw new Error('Usuário não encontrado');
@@ -37,7 +37,8 @@ export async function loginService(email, password) {
 }
 
 export async function registerService(email, password, name) {
-  const existingUser = await getUserByEmail(email);
+  const normalizedEmail = email?.trim();
+  const existingUser = await getUserByEmail(normalizedEmail);
 
   if (existingUser) {
     throw new Error('Email já cadastrado');
@@ -46,7 +47,7 @@ export async function registerService(email, password, name) {
   const hashedPassword = await bcrypt.hash(password, 10);
 
   const user = await createUser({
-    email,
+    email: normalizedEmail,
     password: hashedPassword,
     name,
     role: 'aluno'
@@ -71,4 +72,19 @@ export async function registerService(email, password, name) {
       role: user.role
     }
   };
+}
+
+export async function updateProfileService(id, data) {
+  return await updateUserById(id, data);
+}
+
+export async function changePasswordService(id, oldPassword, newPassword) {
+  const user = await getUserById(id);
+  if (!user) throw new Error('Usuário não encontrado');
+
+  const match = await bcrypt.compare(oldPassword, user.password);
+  if (!match) throw new Error('Senha atual incorreta');
+
+  const hashed = await bcrypt.hash(newPassword, 10);
+  return await changeUserPassword(id, hashed);
 }

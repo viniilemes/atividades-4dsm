@@ -38,6 +38,8 @@ export const authService = {
     api.post('/auth/login', { email, password }),
   register: (name, email, password) =>
     api.post('/auth/register', { name, email, password }),
+  updateProfile: (data) => api.put('/auth/profile', data),
+  changePassword: (data) => api.post('/auth/change-password', data),
 };
 
 export const alunosService = {

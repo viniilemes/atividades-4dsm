@@ -6,26 +6,35 @@ import {
   ScrollView,
   TouchableOpacity,
   Alert,
+  Platform,
 } from 'react-native';
+import { useNavigation } from '@react-navigation/native';
 import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import { AuthContext } from '../context/AuthContext';
 
 export default function DashboardScreen() {
   const { user, logout } = useContext(AuthContext);
+  const navigation = useNavigation();
 
   const handleLogout = () => {
-    Alert.alert(
-      'Sair',
-      'Tem certeza que deseja sair?',
-      [
-        { text: 'Cancelar', onPress: () => {} },
-        {
-          text: 'Sair',
-          onPress: logout,
-          style: 'destructive',
-        },
-      ]
-    );
+    const doLogout = async () => {
+      await logout();
+      try {
+        if (typeof window !== 'undefined') window.location.reload();
+      } catch (e) {}
+    };
+
+    if (Platform.OS === 'web') {
+      if (window.confirm('Tem certeza que deseja sair?')) {
+        doLogout();
+      }
+      return;
+    }
+
+    Alert.alert('Sair', 'Tem certeza que deseja sair?', [
+      { text: 'Cancelar', onPress: () => {} },
+      { text: 'Sair', onPress: doLogout, style: 'destructive' },
+    ]);
   };
 
   const menuItems = [
@@ -52,6 +61,7 @@ export default function DashboardScreen() {
       title: 'Perfil',
       description: 'Seu perfil',
       color: '#FFA07A',
+      route: 'ProfileTab',
     },
   ];
 
@@ -62,7 +72,7 @@ export default function DashboardScreen() {
           <Text style={styles.greeting}>Bem-vindo!</Text>
           <Text style={styles.userName}>{user?.name}</Text>
         </View>
-        <TouchableOpacity onPress={handleLogout} style={styles.logoutButton}>
+        <TouchableOpacity accessibilityRole="button" onPress={handleLogout} style={styles.logoutButton}>
           <MaterialCommunityIcons name="logout" size={24} color="#fff" />
         </TouchableOpacity>
       </View>
@@ -81,6 +91,23 @@ export default function DashboardScreen() {
           <TouchableOpacity
             key={index}
             style={[styles.menuCard, { borderLeftColor: item.color }]}
+            accessibilityRole="button"
+            onPress={() => {
+              // navigate to the corresponding tab if provided
+              if (item.route) return navigation.navigate(item.route);
+              switch (item.title) {
+                case 'Boletim':
+                  return navigation.navigate('BoletimTab');
+                case 'Alunos':
+                  return navigation.navigate('AlunosTab');
+                case 'Disciplinas':
+                  return navigation.navigate('DisciplinasTab');
+                case 'Perfil':
+                  return navigation.navigate('ProfileTab');
+                default:
+                  return null;
+              }
+            }}
           >
             <View style={[styles.iconContainer, { backgroundColor: item.color + '20' }]}>
               <MaterialCommunityIcons name={item.icon} size={32} color={item.color} />
