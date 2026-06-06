@@ -8,16 +8,18 @@ import {
   ActivityIndicator,
   Alert,
 } from 'react-native';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { AuthContext } from '../context/AuthContext';
+import { ThemeContext } from '../context/ThemeContext';
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export default function LoginScreen({ navigation }) {
+export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const { login, loading } = useContext(AuthContext);
+  const { colors } = useContext(ThemeContext);
 
   const handleLogin = async () => {
     if (!email || !password) {
@@ -26,7 +28,7 @@ export default function LoginScreen({ navigation }) {
     }
 
     if (!emailRegex.test(email.trim())) {
-      Alert.alert('Erro', 'Informe um email válido');
+      Alert.alert('Erro', 'Informe um email valido');
       return;
     }
 
@@ -38,20 +40,20 @@ export default function LoginScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.headerContainer}>
         <MaterialCommunityIcons name="school" size={80} color="#4A90E2" />
         <Text style={styles.title}>App Scholar</Text>
-        <Text style={styles.subtitle}>Gerenciamento Acadêmico</Text>
+        <Text style={styles.subtitle}>Gerenciamento Academico</Text>
       </View>
 
       <View style={styles.formContainer}>
-        <View style={styles.inputContainer}>
+        <View style={[styles.inputContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <MaterialCommunityIcons name="email" size={20} color="#666" />
           <TextInput
-            style={styles.input}
+            style={[styles.input, { color: colors.text }]}
             placeholder="Email"
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.textMuted}
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
@@ -60,18 +62,18 @@ export default function LoginScreen({ navigation }) {
           />
         </View>
 
-        <View style={styles.inputContainer}>
+        <View style={[styles.inputContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <MaterialCommunityIcons name="lock" size={20} color="#666" />
           <TextInput
-            style={styles.input}
+            style={[styles.input, { color: colors.text }]}
             placeholder="Senha"
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.textMuted}
             value={password}
             onChangeText={setPassword}
             secureTextEntry={!showPassword}
             editable={!loading}
           />
-          <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+          <TouchableOpacity onPress={() => setShowPassword(!showPassword)} disabled={loading}>
             <MaterialCommunityIcons
               name={showPassword ? 'eye' : 'eye-off'}
               size={20}
@@ -92,20 +94,9 @@ export default function LoginScreen({ navigation }) {
           )}
         </TouchableOpacity>
 
-        <View style={styles.divider}>
-          <View style={styles.line} />
-          <Text style={styles.dividerText}>ou</Text>
-          <View style={styles.line} />
-        </View>
-
-        <TouchableOpacity
-          onPress={() => navigation.navigate('Register')}
-          disabled={loading}
-        >
-          <Text style={styles.registerText}>
-            Não tem conta? <Text style={styles.registerLink}>Registre-se</Text>
-          </Text>
-        </TouchableOpacity>
+        <Text style={styles.accessHint}>
+          Caso nao tenha acesso, solicite seu login ao administrador.
+        </Text>
       </View>
     </View>
   );
@@ -168,27 +159,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
   },
-  divider: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    marginVertical: 24,
-  },
-  line: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#e0e0e0',
-  },
-  dividerText: {
-    marginHorizontal: 8,
-    color: '#999',
-  },
-  registerText: {
+  accessHint: {
     textAlign: 'center',
     color: '#666',
     fontSize: 14,
-  },
-  registerLink: {
-    color: '#4A90E2',
-    fontWeight: '600',
+    marginTop: 20,
   },
 });

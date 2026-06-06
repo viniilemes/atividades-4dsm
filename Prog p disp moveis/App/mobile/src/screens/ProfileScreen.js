@@ -1,4 +1,4 @@
-import { useContext } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import {
   View,
   Text,
@@ -9,12 +9,60 @@ import {
   Platform,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { AuthContext } from '../context/AuthContext';
+import { ThemeContext } from '../context/ThemeContext';
+import { alunosService, disciplinasService } from '../services/api';
 
 export default function ProfileScreen() {
   const { user, logout } = useContext(AuthContext);
+  const { colors } = useContext(ThemeContext);
   const navigation = useNavigation();
+  const [stats, setStats] = useState({
+    alunos: null,
+    disciplinas: null,
+    loading: true,
+    error: null,
+  });
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const loadStats = async () => {
+      setStats((prev) => ({ ...prev, loading: true, error: null }));
+
+      try {
+        const [alunosResponse, disciplinasResponse] = await Promise.all([
+          alunosService.list(),
+          disciplinasService.list(),
+        ]);
+
+        if (!isMounted) return;
+
+        setStats({
+          alunos: alunosResponse.data.length,
+          disciplinas: disciplinasResponse.data.length,
+          loading: false,
+          error: null,
+        });
+      } catch (error) {
+        if (!isMounted) return;
+
+        setStats({
+          alunos: null,
+          disciplinas: null,
+          loading: false,
+          error: 'Falha ao carregar estatisticas',
+        });
+      }
+    };
+
+    loadStats();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   const handleLogout = () => {
     const doLogout = async () => {
@@ -64,8 +112,17 @@ export default function ProfileScreen() {
     },
   ];
 
+  const formatStat = (value) => {
+    if (stats.loading) return '...';
+    if (stats.error) return 'Erro';
+    return String(value ?? 0);
+  };
+
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <ScrollView
+      style={[styles.container, { backgroundColor: colors.background }]}
+      showsVerticalScrollIndicator={false}
+    >
       <View style={styles.header}>
         <View style={styles.avatarContainer}>
           <MaterialCommunityIcons name="account-circle" size={100} color="#4A90E2" />
@@ -78,15 +135,19 @@ export default function ProfileScreen() {
       </View>
 
       <View style={styles.statsContainer}>
-        <View style={styles.statCard}>
+        <View style={[styles.statCard, { backgroundColor: colors.surface }]}>
           <MaterialCommunityIcons name="book-multiple" size={32} color="#4A90E2" />
-          <Text style={styles.statLabel}>Disciplinas</Text>
-          <Text style={styles.statValue}>--</Text>
+          <Text style={[styles.statLabel, { color: colors.textMuted }]}>Disciplinas</Text>
+          <Text style={[styles.statValue, { color: colors.text }]}>
+            {formatStat(stats.disciplinas)}
+          </Text>
         </View>
-        <View style={styles.statCard}>
-          <MaterialCommunityIcons name="star" size={32} color="#FFC107" />
-          <Text style={styles.statLabel}>Média</Text>
-          <Text style={styles.statValue}>--</Text>
+        <View style={[styles.statCard, { backgroundColor: colors.surface }]}>
+          <MaterialCommunityIcons name="account-multiple" size={32} color="#FFC107" />
+          <Text style={[styles.statLabel, { color: colors.textMuted }]}>Alunos</Text>
+          <Text style={[styles.statValue, { color: colors.text }]}>
+            {formatStat(stats.alunos)}
+          </Text>
         </View>
       </View>
 
@@ -95,18 +156,14 @@ export default function ProfileScreen() {
         {menuItems.map((item, index) => (
           <TouchableOpacity
             key={index}
-            style={styles.menuItem}
+            style={[styles.menuItem, { backgroundColor: colors.surface }]}
             accessibilityRole="button"
-            onPress={() => {
-              // keep current behavior for placeholders
-              if (item.onPress) return item.onPress();
-              return null;
-            }}
+            onPress={item.onPress}
           >
             <View style={[styles.menuIconContainer, { backgroundColor: item.color + '20' }]}>
               <MaterialCommunityIcons name={item.icon} size={24} color={item.color} />
             </View>
-            <Text style={styles.menuLabel}>{item.label}</Text>
+            <Text style={[styles.menuLabel, { color: colors.text }]}>{item.label}</Text>
             <MaterialCommunityIcons name="chevron-right" size={24} color="#ccc" />
           </TouchableOpacity>
         ))}
@@ -125,7 +182,7 @@ export default function ProfileScreen() {
 
       <View style={styles.footer}>
         <Text style={styles.footerText}>App Scholar v1.0.0</Text>
-        <Text style={styles.footerSubtext}>© 2024 - Todos os direitos reservados</Text>
+        <Text style={styles.footerSubtext}>© 2026 - Todos os direitos reservados</Text>
       </View>
     </ScrollView>
   );

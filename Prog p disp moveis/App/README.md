@@ -175,7 +175,6 @@ O servidor estará rodando em `http://localhost:3000`
 
 #### Pré-requisitos
 - Node.js 16+
-- Expo CLI (`npm install -g expo-cli`)
 - Smartphone ou emulador
 
 #### Instalação
@@ -186,12 +185,12 @@ npm install
 
 #### Iniciar aplicação
 ```bash
-expo start
+npx expo start
 ```
 
-Escanear o QR Code com:
-- **iOS**: Camera app
-- **Android**: Expo app
+Escaneie o QR Code com o app Expo Go no Android ou com a Camera no iPhone.
+
+Não use o atalho `a` no PC a menos que o Android SDK e o `adb` estejam instalados.
 
 ---
 

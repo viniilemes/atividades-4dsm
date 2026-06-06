@@ -27,7 +27,22 @@ export async function login(req, res) {
 
 export async function register(req, res) {
   try {
-    const { email, password, name } = req.body;
+    const {
+      email,
+      password,
+      name,
+      role = 'aluno',
+      matricula,
+      telefone,
+      cpf,
+      data_nascimento,
+      cep,
+      endereco,
+      cidade,
+      estado,
+      curso,
+      especialidade,
+    } = req.body;
 
     if (!email || !password || !name) {
       return res.status(400).json({ error: 'Email, senha e nome são obrigatórios' });
@@ -37,9 +52,24 @@ export async function register(req, res) {
       return res.status(400).json({ error: 'Email inválido' });
     }
 
-    const result = await registerService(email, password, name);
+    if (!['aluno', 'professor'].includes(role)) {
+      return res.status(400).json({ error: 'Tipo de conta invÃ¡lido' });
+    }
 
-    logAction('REGISTER_SUCCESS', { email, name });
+    const result = await registerService(name, email, password, role, {
+      matricula,
+      telefone,
+      cpf,
+      data_nascimento,
+      cep,
+      endereco,
+      cidade,
+      estado,
+      curso,
+      especialidade,
+    });
+
+    logAction('REGISTER_SUCCESS', { email, name, role });
 
     return res.status(201).json(result);
   } catch (error) {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useCallback, useContext } from 'react';
 import {
   View,
   Text,
@@ -6,37 +6,51 @@ import {
   FlatList,
   TouchableOpacity,
   ActivityIndicator,
-  Alert,
   TextInput,
 } from 'react-native';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useFocusEffect } from '@react-navigation/native';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { disciplinasService } from '../services/api';
+import { ThemeContext } from '../context/ThemeContext';
+import { AuthContext } from '../context/AuthContext';
 
-export default function DisciplinasScreen() {
+export default function DisciplinasScreen({ navigation }) {
+  const { colors } = useContext(ThemeContext);
+  const { user } = useContext(AuthContext);
+  const isAdmin = user?.role === 'admin';
   const [disciplinas, setDisciplinas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
-  useEffect(() => {
-    fetchDisciplinas();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchDisciplinas();
+    }, [])
+  );
 
-  const fetchDisciplinas = async () => {
-    setLoading(true);
+  const fetchDisciplinas = async (showLoading = true) => {
+    if (showLoading) {
+      setLoading(true);
+    }
     try {
       const response = await disciplinasService.list();
-      setDisciplinas(response.data);
+      setDisciplinas(Array.isArray(response.data) ? response.data : []);
+      setErrorMessage('');
     } catch (error) {
-      Alert.alert('Erro', 'Falha ao carregar disciplinas');
+      setDisciplinas([]);
+      setErrorMessage(error.response?.data?.error || error.message || 'Falha ao carregar disciplinas');
     } finally {
-      setLoading(false);
+      if (showLoading) {
+        setLoading(false);
+      }
     }
   };
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await fetchDisciplinas();
+    await fetchDisciplinas(false);
     setRefreshing(false);
   };
 
@@ -46,15 +60,18 @@ export default function DisciplinasScreen() {
   );
 
   const renderDisciplinaItem = ({ item }) => (
-    <TouchableOpacity style={styles.disciplinaCard}>
+    <TouchableOpacity
+      style={[styles.disciplinaCard, { backgroundColor: colors.surface }]}
+      onPress={() => navigation.navigate('DisciplinaDetalhes', { disciplina: item })}
+    >
       <View style={styles.disciplinaCardContent}>
         <View style={styles.disciplinaIconContainer}>
           <MaterialCommunityIcons name="book" size={32} color="#FF6B6B" />
         </View>
         <View style={styles.disciplinaDetails}>
-          <Text style={styles.disciplinaNome}>{item.nome}</Text>
-          <Text style={styles.disciplinaCodigo}>{item.codigo}</Text>
-          <Text style={styles.disciplinaCarga}>
+          <Text style={[styles.disciplinaNome, { color: colors.text }]}>{item.nome}</Text>
+          <Text style={[styles.disciplinaCodigo, { color: colors.textSecondary }]}>{item.codigo}</Text>
+          <Text style={[styles.disciplinaCarga, { color: colors.textMuted }]}>
             {item.carga_horaria}h - {item.professor_id ? 'Com professor' : 'Sem professor'}
           </Text>
         </View>
@@ -72,24 +89,39 @@ export default function DisciplinasScreen() {
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.searchContainer}>
-        <View style={styles.inputContainer}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.searchContainer, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
+        <View style={[styles.inputContainer, { backgroundColor: colors.surfaceMuted, borderColor: colors.border }]}>
           <MaterialCommunityIcons name="magnify" size={20} color="#666" />
           <TextInput
-            style={styles.input}
+            style={[styles.input, { color: colors.text }]}
             placeholder="Buscar disciplina"
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.textMuted}
             value={searchText}
             onChangeText={setSearchText}
           />
         </View>
+        {isAdmin && (
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => navigation.navigate('CadastroDisciplina')}
+          >
+            <MaterialCommunityIcons name="plus" size={24} color="#fff" />
+          </TouchableOpacity>
+        )}
       </View>
 
       {filteredDisciplinas.length === 0 ? (
         <View style={styles.emptyContainer}>
           <MaterialCommunityIcons name="book-off" size={60} color="#ccc" />
-          <Text style={styles.emptyText}>Nenhuma disciplina encontrada</Text>
+          <Text style={styles.emptyText}>
+            {errorMessage ? `Erro ao carregar disciplinas: ${errorMessage}` : 'Nenhuma disciplina encontrada'}
+          </Text>
+          {errorMessage ? (
+            <TouchableOpacity style={styles.retryButton} onPress={() => fetchDisciplinas()}>
+              <Text style={styles.retryButtonText}>Tentar novamente</Text>
+            </TouchableOpacity>
+          ) : null}
         </View>
       ) : (
         <FlatList
@@ -117,13 +149,17 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   searchContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
     paddingHorizontal: 16,
     paddingVertical: 12,
     backgroundColor: '#fff',
     borderBottomWidth: 1,
     borderBottomColor: '#e0e0e0',
+    gap: 8,
   },
   inputContainer: {
+    flex: 1,
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#f5f5f5',
@@ -195,5 +231,26 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#999',
     marginTop: 12,
+    paddingHorizontal: 24,
+    textAlign: 'center',
+  },
+  addButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: '#4A90E2',
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  retryButton: {
+    marginTop: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: '#4A90E2',
+  },
+  retryButtonText: {
+    color: '#fff',
+    fontWeight: '600',
   },
 });

@@ -2,12 +2,14 @@ import { useState, useContext, useEffect } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthContext } from '../context/AuthContext';
+import { ThemeContext } from '../context/ThemeContext';
 import { authService } from '../services/api';
 
 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export default function EditProfileScreen({ navigation }) {
   const { user, setUser } = useContext(AuthContext);
+  const { colors } = useContext(ThemeContext);
   const [name, setName] = useState(user?.name || '');
   const [email, setEmail] = useState(user?.email || '');
   const [loading, setLoading] = useState(false);
@@ -35,7 +37,15 @@ export default function EditProfileScreen({ navigation }) {
       // update local user and AsyncStorage
       const updated = resp.data;
       if (setUser) setUser((prev) => ({ ...prev, name: updated.name, email: updated.email }));
-      await AsyncStorage.setItem('user', JSON.stringify({ ...( (await AsyncStorage.getItem('user')) ? JSON.parse(await AsyncStorage.getItem('user')) : {}), name: updated.name, email: updated.email }));
+      const storedUser = await AsyncStorage.getItem('user');
+      await AsyncStorage.setItem(
+        'user',
+        JSON.stringify({
+          ...(storedUser ? JSON.parse(storedUser) : {}),
+          name: updated.name,
+          email: updated.email,
+        })
+      );
       Alert.alert('Sucesso', 'Perfil atualizado');
       navigation.goBack();
     } catch (err) {
@@ -46,12 +56,22 @@ export default function EditProfileScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>Nome</Text>
-      <TextInput style={styles.input} value={name} onChangeText={setName} />
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <Text style={[styles.label, { color: colors.text }]}>Nome</Text>
+      <TextInput
+        style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
+        value={name}
+        onChangeText={setName}
+      />
 
-      <Text style={styles.label}>Email</Text>
-      <TextInput style={styles.input} value={email} onChangeText={setEmail} keyboardType="email-address" autoCapitalize="none" />
+      <Text style={[styles.label, { color: colors.text }]}>Email</Text>
+      <TextInput
+        style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
+        value={email}
+        onChangeText={setEmail}
+        keyboardType="email-address"
+        autoCapitalize="none"
+      />
 
       <TouchableOpacity style={styles.saveButton} onPress={handleSave} disabled={loading}>
         <Text style={styles.saveButtonText}>{loading ? 'Salvando...' : 'Salvar'}</Text>

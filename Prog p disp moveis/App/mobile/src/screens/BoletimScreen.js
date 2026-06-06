@@ -8,26 +8,31 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
+  Platform,
+  RefreshControl,
 } from 'react-native';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { boletimService } from '../services/api';
 import { AuthContext } from '../context/AuthContext';
+import { ThemeContext } from '../context/ThemeContext';
 
 export default function BoletimScreen() {
   const [matricula, setMatricula] = useState('');
   const [boletim, setBoletim] = useState(null);
   const [editedGrades, setEditedGrades] = useState({});
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState(null);
   const { user } = useContext(AuthContext);
+  const { colors } = useContext(ThemeContext);
 
-  const handleFetchBoletim = async () => {
+  const handleFetchBoletim = async ({ showAlert = true, showLoading = true } = {}) => {
     if (!matricula.trim()) {
       Alert.alert('Erro', 'Informe uma matrícula');
       return;
     }
 
-    setLoading(true);
+    if (showLoading) setLoading(true);
     setError(null);
     try {
       const response = await boletimService.getByMatricula(matricula);
@@ -39,11 +44,20 @@ export default function BoletimScreen() {
       });
       setEditedGrades(map);
     } catch (err) {
-      setError(err.response?.data?.error || 'Erro ao buscar boletim');
-      Alert.alert('Erro', error);
+      const message = err.response?.data?.error || 'Erro ao buscar boletim';
+      setError(message);
+      if (showAlert) Alert.alert('Erro', message);
     } finally {
-      setLoading(false);
+      if (showLoading) setLoading(false);
     }
+  };
+
+  const handleRefresh = async () => {
+    if (!matricula.trim()) return;
+
+    setRefreshing(true);
+    await handleFetchBoletim({ showAlert: false, showLoading: false });
+    setRefreshing(false);
   };
 
   const getStatusColor = (situation) => {
@@ -54,15 +68,56 @@ export default function BoletimScreen() {
     return situation === 'Aprovado' ? 'check-circle' : 'alert-circle';
   };
 
+  const handleDownloadBoletim = () => {
+    if (!boletim) return;
+
+    const content = [
+      'Boletim Escolar',
+      `Aluno: ${boletim.aluno.nome}`,
+      `Matricula: ${boletim.aluno.matricula}`,
+      `Media geral: ${boletim.mediaGeral.toFixed(2)}`,
+      `Situacao geral: ${boletim.situacaoGeral}`,
+      '',
+      'Disciplinas:',
+      ...boletim.disciplinas.map((disciplina) =>
+        `${disciplina.codigo} - ${disciplina.nome} | Nota 1: ${disciplina.nota1} | Nota 2: ${disciplina.nota2} | Media: ${disciplina.media.toFixed(2)} | ${disciplina.situation}`
+      ),
+    ].join('\n');
+
+    if (Platform.OS === 'web' && typeof window !== 'undefined') {
+      const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `boletim-${boletim.aluno.matricula}.txt`;
+      link.click();
+      URL.revokeObjectURL(url);
+      return;
+    }
+
+    Alert.alert('Boletim', content);
+  };
+
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+    <ScrollView
+      style={[styles.container, { backgroundColor: colors.background }]}
+      showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl
+          refreshing={refreshing}
+          onRefresh={handleRefresh}
+          tintColor={colors.primary}
+          colors={[colors.primary]}
+        />
+      }
+    >
       <View style={styles.searchContainer}>
-        <View style={styles.inputContainer}>
+        <View style={[styles.inputContainer, { backgroundColor: colors.surface, borderColor: colors.border }]}>
           <MaterialCommunityIcons name="account-search" size={20} color="#666" />
           <TextInput
-            style={styles.input}
+            style={[styles.input, { color: colors.text }]}
             placeholder="Digite a matrícula"
-            placeholderTextColor="#999"
+            placeholderTextColor={colors.textMuted}
             value={matricula}
             onChangeText={setMatricula}
             editable={!loading}
@@ -90,11 +145,11 @@ export default function BoletimScreen() {
 
       {boletim && (
         <View style={styles.boletimContainer}>
-          <View style={styles.alunoInfoContainer}>
+          <View style={[styles.alunoInfoContainer, { backgroundColor: colors.surface }]}>
             <MaterialCommunityIcons name="account" size={40} color="#4A90E2" />
             <View style={styles.alunoInfo}>
-              <Text style={styles.alunoNome}>{boletim.aluno.nome}</Text>
-              <Text style={styles.alunoMatricula}>Mat: {boletim.aluno.matricula}</Text>
+              <Text style={[styles.alunoNome, { color: colors.text }]}>{boletim.aluno.nome}</Text>
+              <Text style={[styles.alunoMatricula, { color: colors.textMuted }]}>Mat: {boletim.aluno.matricula}</Text>
             </View>
           </View>
 
@@ -126,14 +181,19 @@ export default function BoletimScreen() {
             </View>
           </View>
 
+          <TouchableOpacity style={styles.downloadButton} onPress={handleDownloadBoletim}>
+            <MaterialCommunityIcons name="download" size={20} color="#fff" />
+            <Text style={styles.downloadButtonText}>Baixar boletim</Text>
+          </TouchableOpacity>
+
           <View style={styles.disciplinasContainer}>
-            <Text style={styles.disciplinasTitle}>Disciplinas</Text>
+            <Text style={[styles.disciplinasTitle, { color: colors.text }]}>Disciplinas</Text>
             {boletim.disciplinas.map((disciplina, index) => (
-              <View key={index} style={styles.disciplinaCard}>
+              <View key={index} style={[styles.disciplinaCard, { backgroundColor: colors.surface }]}>
                 <View style={styles.disciplinaHeader}>
                   <View style={styles.disciplinaInfo}>
-                    <Text style={styles.disciplinaNome}>{disciplina.nome}</Text>
-                    <Text style={styles.disciplinaCodigo}>{disciplina.codigo}</Text>
+                    <Text style={[styles.disciplinaNome, { color: colors.text }]}>{disciplina.nome}</Text>
+                    <Text style={[styles.disciplinaCodigo, { color: colors.textMuted }]}>{disciplina.codigo}</Text>
                   </View>
                   <View
                     style={[
@@ -443,6 +503,20 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   saveButtonText: {
+    color: '#fff',
+    fontWeight: '600',
+  },
+  downloadButton: {
+    backgroundColor: '#4A90E2',
+    borderRadius: 8,
+    paddingVertical: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    flexDirection: 'row',
+    gap: 8,
+    marginBottom: 16,
+  },
+  downloadButtonText: {
     color: '#fff',
     fontWeight: '600',
   },

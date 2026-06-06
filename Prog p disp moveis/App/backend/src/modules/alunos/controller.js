@@ -55,7 +55,19 @@ export async function getAlunoByMatriculaController(req, res) {
 
 export async function createAluno(req, res) {
   try {
-    const { nome, matricula, email, telefone, cpf, data_nascimento } = req.body;
+    const {
+      nome,
+      matricula,
+      email,
+      telefone,
+      cpf,
+      data_nascimento,
+      cep,
+      endereco,
+      cidade,
+      estado,
+      curso,
+    } = req.body;
 
     if (!nome || !matricula || !email) {
       return res.status(400).json({ error: 'Nome, matrícula e email são obrigatórios' });
@@ -67,7 +79,12 @@ export async function createAluno(req, res) {
       email,
       telefone,
       cpf,
-      data_nascimento
+      data_nascimento,
+      cep,
+      endereco,
+      cidade,
+      estado,
+      curso,
     });
 
     logAction('CREATE_ALUNO', { alunoId: aluno.id, matricula });

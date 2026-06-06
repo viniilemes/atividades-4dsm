@@ -2,6 +2,7 @@ import {
   getAllAlunosRepository, 
   getAlunoByIdRepository,
   getAlunoByMatriculaRepository,
+  getAlunoByEmailRepository,
   createAlunoRepository,
   updateAlunoRepository,
   deleteAlunoRepository
@@ -24,6 +25,11 @@ export async function createAlunoService(data) {
   const existingMatricula = await getAlunoByMatriculaRepository(data.matricula);
   if (existingMatricula) {
     throw new Error('Matrícula já cadastrada');
+  }
+
+  const existingEmail = await getAlunoByEmailRepository(data.email);
+  if (existingEmail) {
+    throw new Error('Email ja cadastrado para outro aluno');
   }
 
   return await createAlunoRepository(data);

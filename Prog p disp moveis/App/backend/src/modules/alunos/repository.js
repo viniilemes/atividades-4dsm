@@ -18,10 +18,19 @@ export async function getAlunoByMatriculaRepository(matricula) {
   return result.rows[0];
 }
 
+export async function getAlunoByEmailRepository(email) {
+  const query = 'SELECT * FROM alunos WHERE LOWER(email) = LOWER(TRIM($1))';
+  const result = await pool.query(query, [email]);
+  return result.rows[0];
+}
+
 export async function createAlunoRepository(data) {
   const query = `
-    INSERT INTO alunos (nome, matricula, email, telefone, cpf, data_nascimento)
-    VALUES ($1, $2, $3, $4, $5, $6)
+    INSERT INTO alunos (
+      nome, matricula, email, telefone, cpf, data_nascimento,
+      cep, endereco, cidade, estado, curso
+    )
+    VALUES ($1, $2, LOWER(TRIM($3)), $4, $5, $6, $7, $8, $9, $10, $11)
     RETURNING *
   `;
 
@@ -31,7 +40,12 @@ export async function createAlunoRepository(data) {
     data.email,
     data.telefone || null,
     data.cpf || null,
-    data.data_nascimento || null
+    data.data_nascimento || null,
+    data.cep || null,
+    data.endereco || null,
+    data.cidade || null,
+    data.estado || null,
+    data.curso || null
   ];
 
   const result = await pool.query(query, values);
@@ -39,7 +53,18 @@ export async function createAlunoRepository(data) {
 }
 
 export async function updateAlunoRepository(id, data) {
-  const allowedFields = ['nome', 'email', 'telefone', 'cpf', 'data_nascimento'];
+  const allowedFields = [
+    'nome',
+    'email',
+    'telefone',
+    'cpf',
+    'data_nascimento',
+    'cep',
+    'endereco',
+    'cidade',
+    'estado',
+    'curso'
+  ];
   const fields = Object.keys(data).filter(key => allowedFields.includes(key));
 
   if (fields.length === 0) {

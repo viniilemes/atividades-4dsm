@@ -1,8 +1,10 @@
 import { useState, useContext } from 'react';
 import { View, Text, TextInput, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { authService } from '../services/api';
+import { ThemeContext } from '../context/ThemeContext';
 
 export default function ChangePasswordScreen({ navigation }) {
+  const { colors } = useContext(ThemeContext);
   const [oldPassword, setOldPassword] = useState('');
   const [newPassword, setNewPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
@@ -30,15 +32,30 @@ export default function ChangePasswordScreen({ navigation }) {
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.label}>Senha atual</Text>
-      <TextInput style={styles.input} secureTextEntry value={oldPassword} onChangeText={setOldPassword} />
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <Text style={[styles.label, { color: colors.text }]}>Senha atual</Text>
+      <TextInput
+        style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
+        secureTextEntry
+        value={oldPassword}
+        onChangeText={setOldPassword}
+      />
 
-      <Text style={styles.label}>Nova senha</Text>
-      <TextInput style={styles.input} secureTextEntry value={newPassword} onChangeText={setNewPassword} />
+      <Text style={[styles.label, { color: colors.text }]}>Nova senha</Text>
+      <TextInput
+        style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
+        secureTextEntry
+        value={newPassword}
+        onChangeText={setNewPassword}
+      />
 
-      <Text style={styles.label}>Confirmar nova senha</Text>
-      <TextInput style={styles.input} secureTextEntry value={confirmPassword} onChangeText={setConfirmPassword} />
+      <Text style={[styles.label, { color: colors.text }]}>Confirmar nova senha</Text>
+      <TextInput
+        style={[styles.input, { backgroundColor: colors.surface, borderColor: colors.border, color: colors.text }]}
+        secureTextEntry
+        value={confirmPassword}
+        onChangeText={setConfirmPassword}
+      />
 
       <TouchableOpacity style={styles.saveButton} onPress={handleChange} disabled={loading}>
         <Text style={styles.saveButtonText}>{loading ? 'Alterando...' : 'Alterar senha'}</Text>

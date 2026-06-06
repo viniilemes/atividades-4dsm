@@ -11,15 +11,20 @@ import {
   FlatList,
   Modal,
 } from 'react-native';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { externalApisService } from '../services/externalApis';
-import { alunosService } from '../services/api';
+import { authService } from '../services/api';
 import { AuthContext } from '../context/AuthContext';
+import { ThemeContext } from '../context/ThemeContext';
+
+const cidadesCache = new Map();
 
 export default function CadastroAlunoScreen({ navigation }) {
+  const { colors } = useContext(ThemeContext);
   const [nome, setNome] = useState('');
   const [matricula, setMatricula] = useState('');
   const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [telefone, setTelefone] = useState('');
   const [cep, setCep] = useState('');
   const [endereco, setEndereco] = useState('');
@@ -42,6 +47,11 @@ export default function CadastroAlunoScreen({ navigation }) {
   }, []);
 
   const carregarEstados = async () => {
+    if (password.length < 6) {
+      Alert.alert('Erro', 'A senha deve ter pelo menos 6 caracteres');
+      return;
+    }
+
     try {
       setLoading(true);
       const response = await externalApisService.getEstados();
@@ -55,8 +65,15 @@ export default function CadastroAlunoScreen({ navigation }) {
 
   const carregarCidades = async (estadoId) => {
     try {
+      const cachedCidades = cidadesCache.get(estadoId);
+      if (cachedCidades) {
+        setCidades(cachedCidades);
+        return;
+      }
+
       setLoading(true);
       const response = await externalApisService.getCidadesByEstado(estadoId);
+      cidadesCache.set(estadoId, response);
       setCidades(response);
     } catch (error) {
       Alert.alert('Erro', 'Falha ao carregar cidades');
@@ -98,18 +115,21 @@ export default function CadastroAlunoScreen({ navigation }) {
   };
 
   const handleCadastro = async () => {
-    if (!nome || !matricula || !email) {
+    if (!nome || !matricula || !email || !password) {
       Alert.alert('Erro', 'Preencha os campos obrigatórios');
       return;
     }
 
     try {
       setLoading(true);
-      await alunosService.create({
-        nome,
+      await authService.createUser({
+        name: nome,
+        role: 'aluno',
         matricula,
         email,
+        password,
         telefone,
+        cep,
         endereco,
         cidade,
         estado,
@@ -126,12 +146,15 @@ export default function CadastroAlunoScreen({ navigation }) {
   };
 
   return (
-    <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      <View style={styles.headerContainer}>
+    <ScrollView
+      style={[styles.container, { backgroundColor: colors.background }]}
+      showsVerticalScrollIndicator={false}
+    >
+      <View style={[styles.headerContainer, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <TouchableOpacity onPress={() => navigation.goBack()}>
           <MaterialCommunityIcons name="arrow-left" size={24} color="#4A90E2" />
         </TouchableOpacity>
-        <Text style={styles.title}>Novo Aluno</Text>
+        <Text style={[styles.title, { color: colors.text }]}>Novo Aluno</Text>
         <View style={{ width: 24 }} />
       </View>
 
@@ -177,6 +200,22 @@ export default function CadastroAlunoScreen({ navigation }) {
               keyboardType="email-address"
               value={email}
               onChangeText={setEmail}
+              editable={!loading}
+            />
+          </View>
+        </View>
+
+        {/* Senha */}
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>Senha de acesso *</Text>
+          <View style={styles.inputWrapper}>
+            <MaterialCommunityIcons name="lock" size={20} color="#666" />
+            <TextInput
+              style={styles.input}
+              placeholder="Minimo 6 caracteres"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry
               editable={!loading}
             />
           </View>

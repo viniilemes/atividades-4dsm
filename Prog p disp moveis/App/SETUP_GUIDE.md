@@ -139,19 +139,20 @@ cd mobile
 npm install
 ```
 
-#### Instalar Expo CLI (global)
-```bash
-npm install -g expo-cli
-```
-
 #### Iniciar app
 ```bash
-expo start
+npm run start
 ```
 
-Você verá um QR code. Escanear com:
-- **iOS**: Camera app
-- **Android**: Expo Go app
+Ou, se estiver fora da pasta mobile:
+```bash
+cd mobile
+npx expo start
+```
+
+Você verá um QR code. Escaneie com o app Expo Go no Android ou com a Camera no iPhone.
+
+Não use o atalho `a` neste computador, porque ele tenta abrir um emulador Android local. Sem Android SDK e `adb`, isso falha e pode cair em prompts extras do Expo.
 
 ---
 

@@ -15,6 +15,7 @@ CREATE TABLE alunos (
   nome VARCHAR(255) NOT NULL,
   matricula VARCHAR(50) UNIQUE NOT NULL,
   email VARCHAR(255) NOT NULL,
+  data_nascimento DATE,
   telefone VARCHAR(20),
   cep VARCHAR(20),
   endereco VARCHAR(255),
@@ -70,7 +71,7 @@ CREATE INDEX idx_grades_disciplina ON grades(disciplina_id);
 
 -- Insert default admin user
 INSERT INTO users (name, email, password, role) VALUES
-('Admin User', 'admin@email.com', '$2b$10$...hashed_password_here...', 'admin');
+('Admin User', 'admin@email.com', '$2b$10$bZx8V.wwvHDDtnD0K4exkOyP0D1w1VcvJAp.9A.cDzRgK.ZTkVZrG', 'admin');
 
 -- Insert sample professors
 INSERT INTO professores (nome, email, especialidade) VALUES

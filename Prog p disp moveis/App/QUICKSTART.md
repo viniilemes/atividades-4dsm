@@ -20,7 +20,7 @@ psql -U postgres -d app_scholar -f ../schema.sql
 ```bash
 cd mobile
 npm install
-expo start
+npx expo start
 ```
 ✅ Escanear QR code
 

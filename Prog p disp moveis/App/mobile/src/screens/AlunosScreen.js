@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useCallback, useContext } from 'react';
 import {
   View,
   Text,
@@ -6,37 +6,51 @@ import {
   FlatList,
   TouchableOpacity,
   ActivityIndicator,
-  Alert,
   TextInput,
 } from 'react-native';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import { useFocusEffect } from '@react-navigation/native';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { alunosService } from '../services/api';
+import { ThemeContext } from '../context/ThemeContext';
+import { AuthContext } from '../context/AuthContext';
 
 export default function AlunosScreen({ navigation }) {
+  const { colors } = useContext(ThemeContext);
+  const { user } = useContext(AuthContext);
+  const canCreateAluno = user?.role === 'admin';
   const [alunos, setAlunos] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchText, setSearchText] = useState('');
   const [refreshing, setRefreshing] = useState(false);
+  const [errorMessage, setErrorMessage] = useState('');
 
-  useEffect(() => {
-    fetchAlunos();
-  }, []);
+  useFocusEffect(
+    useCallback(() => {
+      fetchAlunos();
+    }, [])
+  );
 
-  const fetchAlunos = async () => {
-    setLoading(true);
+  const fetchAlunos = async (showLoading = true) => {
+    if (showLoading) {
+      setLoading(true);
+    }
     try {
       const response = await alunosService.list();
-      setAlunos(response.data);
+      setAlunos(Array.isArray(response.data) ? response.data : []);
+      setErrorMessage('');
     } catch (error) {
-      Alert.alert('Erro', 'Falha ao carregar alunos');
+      setAlunos([]);
+      setErrorMessage(error.response?.data?.error || error.message || 'Falha ao carregar alunos');
     } finally {
-      setLoading(false);
+      if (showLoading) {
+        setLoading(false);
+      }
     }
   };
 
   const onRefresh = async () => {
     setRefreshing(true);
-    await fetchAlunos();
+    await fetchAlunos(false);
     setRefreshing(false);
   };
 
@@ -46,15 +60,18 @@ export default function AlunosScreen({ navigation }) {
   );
 
   const renderAlunoItem = ({ item }) => (
-    <TouchableOpacity style={styles.alunoCard}>
+    <TouchableOpacity
+      style={[styles.alunoCard, { backgroundColor: colors.surface }]}
+      onPress={() => navigation.navigate('AlunoDetalhes', { aluno: item })}
+    >
       <View style={styles.alunoCardContent}>
         <View style={styles.alunoIconContainer}>
           <MaterialCommunityIcons name="account" size={32} color="#4A90E2" />
         </View>
         <View style={styles.alunoDetails}>
-          <Text style={styles.alunoNome}>{item.nome}</Text>
-          <Text style={styles.alunoMatricula}>Mat: {item.matricula}</Text>
-          <Text style={styles.alunoEmail}>{item.email}</Text>
+          <Text style={[styles.alunoNome, { color: colors.text }]}>{item.nome}</Text>
+          <Text style={[styles.alunoMatricula, { color: colors.textSecondary }]}>Mat: {item.matricula}</Text>
+          <Text style={[styles.alunoEmail, { color: colors.textMuted }]}>{item.email}</Text>
         </View>
         <MaterialCommunityIcons name="chevron-right" size={24} color="#ccc" />
       </View>
@@ -70,32 +87,41 @@ export default function AlunosScreen({ navigation }) {
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.headerContainer}>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <View style={[styles.headerContainer, { backgroundColor: colors.surface, borderBottomColor: colors.border }]}>
         <View style={styles.searchContainer}>
-          <View style={styles.inputContainer}>
+          <View style={[styles.inputContainer, { backgroundColor: colors.surfaceMuted, borderColor: colors.border }]}>
             <MaterialCommunityIcons name="magnify" size={20} color="#666" />
             <TextInput
-              style={styles.input}
+              style={[styles.input, { color: colors.text }]}
               placeholder="Buscar por nome ou matrícula"
-              placeholderTextColor="#999"
+              placeholderTextColor={colors.textMuted}
               value={searchText}
               onChangeText={setSearchText}
             />
           </View>
         </View>
-        <TouchableOpacity
-          style={styles.addButton}
-          onPress={() => navigation.navigate('CadastroAluno')}
-        >
-          <MaterialCommunityIcons name="plus" size={24} color="#fff" />
-        </TouchableOpacity>
+        {canCreateAluno && (
+          <TouchableOpacity
+            style={styles.addButton}
+            onPress={() => navigation.navigate('CadastroAluno')}
+          >
+            <MaterialCommunityIcons name="plus" size={24} color="#fff" />
+          </TouchableOpacity>
+        )}
       </View>
 
       {filteredAlunos.length === 0 ? (
         <View style={styles.emptyContainer}>
           <MaterialCommunityIcons name="account-off" size={60} color="#ccc" />
-          <Text style={styles.emptyText}>Nenhum aluno encontrado</Text>
+          <Text style={styles.emptyText}>
+            {errorMessage ? `Erro ao carregar alunos: ${errorMessage}` : 'Nenhum aluno encontrado'}
+          </Text>
+          {errorMessage ? (
+            <TouchableOpacity style={styles.retryButton} onPress={() => fetchAlunos()}>
+              <Text style={styles.retryButtonText}>Tentar novamente</Text>
+            </TouchableOpacity>
+          ) : null}
         </View>
       ) : (
         <FlatList
@@ -215,5 +241,18 @@ const styles = StyleSheet.create({
     fontSize: 16,
     color: '#999',
     marginTop: 12,
+    paddingHorizontal: 24,
+    textAlign: 'center',
+  },
+  retryButton: {
+    marginTop: 16,
+    paddingHorizontal: 16,
+    paddingVertical: 10,
+    borderRadius: 8,
+    backgroundColor: '#4A90E2',
+  },
+  retryButtonText: {
+    color: '#fff',
+    fontWeight: '600',
   },
 });

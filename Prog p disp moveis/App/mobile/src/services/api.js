@@ -1,11 +1,18 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Platform } from 'react-native';
 
-const BASE_URL = 'http://localhost:3000/api';
+const ENV_API_URL = process.env.EXPO_PUBLIC_API_URL;
+
+const BASE_URL = ENV_API_URL || Platform.select({
+  android: 'http://10.0.2.2:3000/api',
+  ios: 'http://localhost:3000/api',
+  default: 'http://localhost:3000/api',
+});
 
 export const api = axios.create({
   baseURL: BASE_URL,
-  timeout: 10000,
+  timeout: 30000, // Aumentado de 10s para 30s para conexões lentas
 });
 
 // Interceptor para adicionar token em todas requisições
@@ -36,8 +43,9 @@ api.interceptors.response.use(
 export const authService = {
   login: (email, password) =>
     api.post('/auth/login', { email, password }),
-  register: (name, email, password) =>
-    api.post('/auth/register', { name, email, password }),
+  register: (name, email, password, role, profile = {}) =>
+    api.post('/auth/register', { name, email, password, role, ...profile }),
+  createUser: (data) => api.post('/auth/register', data),
   updateProfile: (data) => api.put('/auth/profile', data),
   changePassword: (data) => api.post('/auth/change-password', data),
 };
@@ -57,6 +65,14 @@ export const disciplinasService = {
   create: (data) => api.post('/disciplinas', data),
   update: (id, data) => api.put(`/disciplinas/${id}`, data),
   delete: (id) => api.delete(`/disciplinas/${id}`),
+};
+
+export const professoresService = {
+  list: () => api.get('/professores'),
+  getById: (id) => api.get(`/professores/${id}`),
+  create: (data) => api.post('/professores', data),
+  update: (id, data) => api.put(`/professores/${id}`, data),
+  delete: (id) => api.delete(`/professores/${id}`),
 };
 
 export const boletimService = {

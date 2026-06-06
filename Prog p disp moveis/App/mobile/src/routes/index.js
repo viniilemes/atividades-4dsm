@@ -1,27 +1,40 @@
 import { useContext, useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { AuthContext } from '../context/AuthContext';
+import { ThemeContext } from '../context/ThemeContext';
 import { AuthStack } from './AuthStack';
 import { AppStack } from './AppStack';
-import { ActivityIndicator, View } from 'react-native';
 
 export function Navigation() {
   const { isLoggedIn, loading, restoreToken } = useContext(AuthContext);
+  const { colors } = useContext(ThemeContext);
 
   useEffect(() => {
-    restoreToken();
+    const initAuth = async () => {
+      try {
+        await restoreToken();
+      } catch (error) {
+        console.error('Erro ao iniciar autenticação:', error);
+      }
+    };
+
+    initAuth();
   }, []);
 
-  if (loading) {
-    return (
-      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-        <ActivityIndicator size="large" color="#4A90E2" />
-      </View>
-    );
-  }
-
   return (
-    <NavigationContainer>
+    <NavigationContainer
+      theme={{
+        dark: colors.dark,
+        colors: {
+          primary: colors.primary,
+          background: colors.background,
+          card: colors.surface,
+          text: colors.text,
+          border: colors.border,
+          notification: colors.primary,
+        },
+      }}
+    >
       {isLoggedIn ? <AppStack /> : <AuthStack />}
     </NavigationContainer>
   );

@@ -1,6 +1,7 @@
 import { 
   getAllDisciplinasRepository, 
   getDisciplinaByIdRepository,
+  getDisciplinaByCodigoRepository,
   createDisciplinaRepository,
   updateDisciplinaRepository,
   deleteDisciplinaRepository
@@ -15,6 +16,11 @@ export async function getDisciplinaById(id) {
 }
 
 export async function createDisciplinaService(data) {
+  const existingDisciplina = await getDisciplinaByCodigoRepository(data.codigo);
+  if (existingDisciplina) {
+    throw new Error('Codigo ja cadastrado para outra disciplina');
+  }
+
   return await createDisciplinaRepository(data);
 }
 

@@ -52,6 +52,7 @@ yarn.lock
 .env.*.local
 
 # Misc
+.expo/
 .cache/
 .next/
 out/

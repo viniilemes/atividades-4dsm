@@ -1,28 +1,30 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import { View, Text, StyleSheet, Switch, Alert } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { ThemeContext } from '../context/ThemeContext';
 
 export default function NotificationsScreen() {
   const [enabled, setEnabled] = useState(false);
+  const { colors } = useContext(ThemeContext);
 
   useEffect(() => {
     (async () => {
-      const v = await AsyncStorage.getItem('notificationsEnabled');
-      setEnabled(v === 'true');
+      const value = await AsyncStorage.getItem('notificationsEnabled');
+      setEnabled(value === 'true');
     })();
   }, []);
 
-  const toggle = async (val) => {
-    setEnabled(val);
-    await AsyncStorage.setItem('notificationsEnabled', val ? 'true' : 'false');
-    Alert.alert('Configurações', val ? 'Notificações ativadas' : 'Notificações desativadas');
+  const toggle = async (value) => {
+    setEnabled(value);
+    await AsyncStorage.setItem('notificationsEnabled', value ? 'true' : 'false');
+    Alert.alert('Configuracoes', value ? 'Notificacoes ativadas' : 'Notificacoes desativadas');
   };
 
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Notificações</Text>
-      <View style={styles.row}>
-        <Text>Receber notificações</Text>
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <Text style={[styles.title, { color: colors.text }]}>Notificacoes</Text>
+      <View style={[styles.row, { backgroundColor: colors.surface }]}>
+        <Text style={{ color: colors.text }}>Receber notificacoes</Text>
         <Switch value={enabled} onValueChange={toggle} />
       </View>
     </View>
@@ -30,7 +32,13 @@ export default function NotificationsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, padding: 16, backgroundColor: '#f5f5f5' },
+  container: { flex: 1, padding: 16 },
   title: { fontSize: 20, fontWeight: '700', marginBottom: 12 },
-  row: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingVertical: 12 },
+  row: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: 12,
+    borderRadius: 8,
+  },
 });

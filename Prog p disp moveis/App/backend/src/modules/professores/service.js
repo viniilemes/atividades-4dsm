@@ -1,6 +1,7 @@
 import {
   getAllProfessoresRepository,
   getProfessorByIdRepository,
+  getProfessorByEmailRepository,
   createProfessorRepository,
   updateProfessorRepository,
   deleteProfessorRepository,
@@ -15,6 +16,11 @@ export async function getProfessorById(id) {
 }
 
 export async function createProfessor(data) {
+  const existingProfessor = await getProfessorByEmailRepository(data.email);
+  if (existingProfessor) {
+    throw new Error('Email ja cadastrado para outro professor');
+  }
+
   return await createProfessorRepository(data);
 }
 

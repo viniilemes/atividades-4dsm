@@ -3,26 +3,36 @@
     "name": "App Scholar",
     "slug": "app-scholar",
     "version": "1.0.0",
+    "sdkVersion": "54.0.0",
     "orientation": "portrait",
+    "icon": "./assets/icon.png",
     "splash": {
+      "image": "./assets/splash.png",
       "resizeMode": "contain",
       "backgroundColor": "#4A90E2"
     },
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
-      "supportsTabletMode": true,
+      "supportsTablet": true,
       "buildNumber": "1"
     },
     "android": {
+      "package": "com.appscholar.app",
       "versionCode": 1,
-      "softwareKeyboardLayoutMode": "pan"
+      "softwareKeyboardLayoutMode": "pan",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/icon.png",
+        "backgroundColor": "#050B1F"
+      }
     },
     "extra": {
       "eas": {
-        "projectId": "your-project-id"
+        "projectId": "18a4f07e-bad3-4320-ac3a-0cc0ffddd52e"
       }
     }
   }

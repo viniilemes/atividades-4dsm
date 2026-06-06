@@ -22,28 +22,13 @@ export function AuthProvider({ children }) {
       setUser(userData);
       return userData;
     } catch (err) {
-      const errorMsg = err.response?.data?.error || 'Erro ao fazer login';
-      setError(errorMsg);
-      throw new Error(errorMsg);
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const register = useCallback(async (name, email, password) => {
-    setLoading(true);
-    setError(null);
-    try {
-      const response = await authService.register(name, email.trim(), password);
-      const { token, user: userData } = response.data;
-
-      await AsyncStorage.setItem('authToken', token);
-      await AsyncStorage.setItem('user', JSON.stringify(userData));
-
-      setUser(userData);
-      return userData;
-    } catch (err) {
-      const errorMsg = err.response?.data?.error || 'Erro ao registrar';
+      console.error('Login Error:', {
+        status: err.response?.status,
+        error: err.response?.data?.error,
+        message: err.message,
+        url: err.config?.url,
+      });
+      const errorMsg = err.response?.data?.error || err.message || 'Erro ao fazer login';
       setError(errorMsg);
       throw new Error(errorMsg);
     } finally {
@@ -69,10 +54,19 @@ export function AuthProvider({ children }) {
       const userJson = await AsyncStorage.getItem('user');
 
       if (token && userJson) {
-        setUser(JSON.parse(userJson));
+        try {
+          setUser(JSON.parse(userJson));
+        } catch (parseError) {
+          await AsyncStorage.removeItem('authToken');
+          await AsyncStorage.removeItem('user');
+          setUser(null);
+        }
+      } else {
+        setUser(null);
       }
     } catch (err) {
       console.error('Erro ao restaurar token:', err);
+      setUser(null);
     } finally {
       setLoading(false);
     }
@@ -86,7 +80,6 @@ export function AuthProvider({ children }) {
         error,
         setUser,
         login,
-        register,
         logout,
         restoreToken,
         isLoggedIn: !!user,

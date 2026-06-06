@@ -9,12 +9,15 @@ import {
   Platform,
 } from 'react-native';
 import { useNavigation } from '@react-navigation/native';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { AuthContext } from '../context/AuthContext';
+import { ThemeContext } from '../context/ThemeContext';
 
 export default function DashboardScreen() {
   const { user, logout } = useContext(AuthContext);
+  const { colors } = useContext(ThemeContext);
   const navigation = useNavigation();
+  const canManageAcademicData = ['admin', 'professor'].includes(user?.role);
 
   const handleLogout = () => {
     const doLogout = async () => {
@@ -49,12 +52,14 @@ export default function DashboardScreen() {
       title: 'Alunos',
       description: 'Gerencie alunos',
       color: '#4ECDC4',
+      managerOnly: true,
     },
     {
       icon: 'book',
       title: 'Disciplinas',
       description: 'Veja as disciplinas',
       color: '#45B7D1',
+      managerOnly: true,
     },
     {
       icon: 'account-circle',
@@ -66,7 +71,7 @@ export default function DashboardScreen() {
   ];
 
   return (
-    <ScrollView style={styles.container}>
+    <ScrollView style={[styles.container, { backgroundColor: colors.background }]}>
       <View style={styles.header}>
         <View>
           <Text style={styles.greeting}>Bem-vindo!</Text>
@@ -78,19 +83,24 @@ export default function DashboardScreen() {
       </View>
 
       <View style={styles.statusContainer}>
-        <View style={styles.statusCard}>
+        <View style={[styles.statusCard, { backgroundColor: colors.surface }]}>
           <MaterialCommunityIcons name="school" size={40} color="#4A90E2" />
-          <Text style={styles.statusLabel}>Aluno</Text>
+          <Text style={[styles.statusLabel, { color: colors.textMuted }]}>Tipo de conta</Text>
           <Text style={styles.statusValue}>{user?.role}</Text>
         </View>
       </View>
 
       <View style={styles.menuContainer}>
         <Text style={styles.menuTitle}>Acesso Rápido</Text>
-        {menuItems.map((item, index) => (
+        {menuItems
+          .filter((item) => !item.managerOnly || canManageAcademicData)
+          .map((item, index) => (
           <TouchableOpacity
             key={index}
-            style={[styles.menuCard, { borderLeftColor: item.color }]}
+            style={[
+              styles.menuCard,
+              { backgroundColor: colors.surface, borderLeftColor: item.color },
+            ]}
             accessibilityRole="button"
             onPress={() => {
               // navigate to the corresponding tab if provided
@@ -113,8 +123,10 @@ export default function DashboardScreen() {
               <MaterialCommunityIcons name={item.icon} size={32} color={item.color} />
             </View>
             <View style={styles.menuContent}>
-              <Text style={styles.menuTitle}>{item.title}</Text>
-              <Text style={styles.menuDescription}>{item.description}</Text>
+              <Text style={[styles.menuTitle, { color: colors.text }]}>{item.title}</Text>
+              <Text style={[styles.menuDescription, { color: colors.textMuted }]}>
+                {item.description}
+              </Text>
             </View>
             <MaterialCommunityIcons name="chevron-right" size={24} color="#ccc" />
           </TouchableOpacity>
@@ -122,7 +134,7 @@ export default function DashboardScreen() {
       </View>
 
       <View style={styles.footer}>
-        <Text style={styles.footerText}>App Scholar v1.0.0</Text>
+        <Text style={[styles.footerText, { color: colors.textMuted }]}>App Scholar v1.0.0</Text>
       </View>
     </ScrollView>
   );

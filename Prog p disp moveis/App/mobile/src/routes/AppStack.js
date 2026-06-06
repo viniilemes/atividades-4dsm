@@ -1,6 +1,9 @@
+import { useContext } from 'react';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
-import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
+import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
+import { ThemeContext } from '../context/ThemeContext';
+import { AuthContext } from '../context/AuthContext';
 
 import DashboardScreen from '../screens/DashboardScreen';
 import BoletimScreen from '../screens/BoletimScreen';
@@ -12,19 +15,28 @@ import ChangePasswordScreen from '../screens/ChangePasswordScreen';
 import ThemeScreen from '../screens/ThemeScreen';
 import NotificationsScreen from '../screens/NotificationsScreen';
 import CadastroAlunoScreen from '../screens/CadastroAlunoScreen';
+import AlunoDetalhesScreen from '../screens/AlunoDetalhesScreen';
+import DisciplinaDetalhesScreen from '../screens/DisciplinaDetalhesScreen';
+import CadastroDisciplinaScreen from '../screens/CadastroDisciplinaScreen';
+import ProfessoresScreen from '../screens/ProfessoresScreen';
+import CadastroProfessorScreen from '../screens/CadastroProfessorScreen';
+import ProfessorDetalhesScreen from '../screens/ProfessorDetalhesScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
 
+const getStackScreenOptions = (colors) => ({
+  headerStyle: { backgroundColor: colors.primary },
+  headerTintColor: '#fff',
+  headerTitleStyle: { fontWeight: 'bold' },
+  contentStyle: { backgroundColor: colors.background },
+});
+
 function DashboardStack() {
+  const { colors } = useContext(ThemeContext);
+
   return (
-    <Stack.Navigator
-      screenOptions={{
-        headerStyle: { backgroundColor: '#4A90E2' },
-        headerTintColor: '#fff',
-        headerTitleStyle: { fontWeight: 'bold' },
-      }}
-    >
+    <Stack.Navigator screenOptions={getStackScreenOptions(colors)}>
       <Stack.Screen
         name="DashboardMain"
         component={DashboardScreen}
@@ -35,14 +47,10 @@ function DashboardStack() {
 }
 
 function BoletimStack() {
+  const { colors } = useContext(ThemeContext);
+
   return (
-    <Stack.Navigator
-      screenOptions={{
-        headerStyle: { backgroundColor: '#4A90E2' },
-        headerTintColor: '#fff',
-        headerTitleStyle: { fontWeight: 'bold' },
-      }}
-    >
+    <Stack.Navigator screenOptions={getStackScreenOptions(colors)}>
       <Stack.Screen
         name="BoletimMain"
         component={BoletimScreen}
@@ -53,14 +61,10 @@ function BoletimStack() {
 }
 
 function AlunosStack() {
+  const { colors } = useContext(ThemeContext);
+
   return (
-    <Stack.Navigator
-      screenOptions={{
-        headerStyle: { backgroundColor: '#4A90E2' },
-        headerTintColor: '#fff',
-        headerTitleStyle: { fontWeight: 'bold' },
-      }}
-    >
+    <Stack.Navigator screenOptions={getStackScreenOptions(colors)}>
       <Stack.Screen
         name="AlunosMain"
         component={AlunosScreen}
@@ -71,37 +75,68 @@ function AlunosStack() {
         component={CadastroAlunoScreen}
         options={{ title: 'Novo Aluno' }}
       />
+      <Stack.Screen
+        name="AlunoDetalhes"
+        component={AlunoDetalhesScreen}
+        options={{ title: 'Detalhes do Aluno' }}
+      />
     </Stack.Navigator>
   );
 }
 
 function DisciplinasStack() {
+  const { colors } = useContext(ThemeContext);
+
   return (
-    <Stack.Navigator
-      screenOptions={{
-        headerStyle: { backgroundColor: '#4A90E2' },
-        headerTintColor: '#fff',
-        headerTitleStyle: { fontWeight: 'bold' },
-      }}
-    >
+    <Stack.Navigator screenOptions={getStackScreenOptions(colors)}>
       <Stack.Screen
         name="DisciplinasMain"
         component={DisciplinasScreen}
         options={{ title: 'Disciplinas' }}
+      />
+      <Stack.Screen
+        name="DisciplinaDetalhes"
+        component={DisciplinaDetalhesScreen}
+        options={{ title: 'Detalhes da Disciplina' }}
+      />
+      <Stack.Screen
+        name="CadastroDisciplina"
+        component={CadastroDisciplinaScreen}
+        options={{ title: 'Nova Disciplina' }}
+      />
+    </Stack.Navigator>
+  );
+}
+
+function ProfessoresStack() {
+  const { colors } = useContext(ThemeContext);
+
+  return (
+    <Stack.Navigator screenOptions={getStackScreenOptions(colors)}>
+      <Stack.Screen
+        name="ProfessoresMain"
+        component={ProfessoresScreen}
+        options={{ title: 'Professores' }}
+      />
+      <Stack.Screen
+        name="CadastroProfessor"
+        component={CadastroProfessorScreen}
+        options={{ title: 'Novo Professor' }}
+      />
+      <Stack.Screen
+        name="ProfessorDetalhes"
+        component={ProfessorDetalhesScreen}
+        options={{ title: 'Detalhes do Professor' }}
       />
     </Stack.Navigator>
   );
 }
 
 function ProfileStack() {
+  const { colors } = useContext(ThemeContext);
+
   return (
-    <Stack.Navigator
-      screenOptions={{
-        headerStyle: { backgroundColor: '#4A90E2' },
-        headerTintColor: '#fff',
-        headerTitleStyle: { fontWeight: 'bold' },
-      }}
-    >
+    <Stack.Navigator screenOptions={getStackScreenOptions(colors)}>
       <Stack.Screen
         name="ProfileMain"
         component={ProfileScreen}
@@ -132,12 +167,22 @@ function ProfileStack() {
 }
 
 export function AppStack() {
+  const { colors } = useContext(ThemeContext);
+  const { user } = useContext(AuthContext);
+  const canManageAcademicData = ['admin', 'professor'].includes(user?.role);
+  const isAdmin = user?.role === 'admin';
+
   return (
     <Tab.Navigator
       screenOptions={{
-        tabBarActiveTintColor: '#4A90E2',
-        tabBarInactiveTintColor: '#999',
-        tabBarStyle: { paddingBottom: 5, height: 60 },
+        tabBarActiveTintColor: colors.primary,
+        tabBarInactiveTintColor: colors.textMuted,
+        tabBarStyle: {
+          paddingBottom: 5,
+          height: 60,
+          backgroundColor: colors.surface,
+          borderTopColor: colors.border,
+        },
         headerShown: false,
       }}
     >
@@ -161,26 +206,42 @@ export function AppStack() {
           ),
         }}
       />
-      <Tab.Screen
-        name="AlunosTab"
-        component={AlunosStack}
-        options={{
-          tabBarLabel: 'Alunos',
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="account-multiple" size={size} color={color} />
-          ),
-        }}
-      />
-      <Tab.Screen
-        name="DisciplinasTab"
-        component={DisciplinasStack}
-        options={{
-          tabBarLabel: 'Disciplinas',
-          tabBarIcon: ({ color, size }) => (
-            <MaterialCommunityIcons name="book" size={size} color={color} />
-          ),
-        }}
-      />
+      {canManageAcademicData && (
+        <Tab.Screen
+          name="AlunosTab"
+          component={AlunosStack}
+          options={{
+            tabBarLabel: 'Alunos',
+            tabBarIcon: ({ color, size }) => (
+              <MaterialCommunityIcons name="account-multiple" size={size} color={color} />
+            ),
+          }}
+        />
+      )}
+      {canManageAcademicData && (
+        <Tab.Screen
+          name="DisciplinasTab"
+          component={DisciplinasStack}
+          options={{
+            tabBarLabel: 'Disciplinas',
+            tabBarIcon: ({ color, size }) => (
+              <MaterialCommunityIcons name="book" size={size} color={color} />
+            ),
+          }}
+        />
+      )}
+      {isAdmin && (
+        <Tab.Screen
+          name="ProfessoresTab"
+          component={ProfessoresStack}
+          options={{
+            tabBarLabel: 'Professores',
+            tabBarIcon: ({ color, size }) => (
+              <MaterialCommunityIcons name="teach" size={size} color={color} />
+            ),
+          }}
+        />
+      )}
       <Tab.Screen
         name="ProfileTab"
         component={ProfileStack}

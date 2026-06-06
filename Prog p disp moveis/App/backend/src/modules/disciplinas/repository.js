@@ -12,10 +12,16 @@ export async function getDisciplinaByIdRepository(id) {
   return result.rows[0];
 }
 
+export async function getDisciplinaByCodigoRepository(codigo) {
+  const query = 'SELECT * FROM disciplinas WHERE LOWER(codigo) = LOWER(TRIM($1))';
+  const result = await pool.query(query, [codigo]);
+  return result.rows[0];
+}
+
 export async function createDisciplinaRepository(data) {
   const query = `
     INSERT INTO disciplinas (nome, codigo, carga_horaria, professor_id)
-    VALUES ($1, $2, $3, $4)
+    VALUES ($1, UPPER(TRIM($2)), $3, $4)
     RETURNING *
   `;
 
