@@ -3,8 +3,10 @@ services:
     name: app-scholar-backend
     runtime: node
     rootDir: backend
+    plan: free
     buildCommand: npm install
     startCommand: npm start
+    healthCheckPath: /health
     envVars:
       - key: NODE_ENV
         value: production
@@ -13,6 +15,15 @@ services:
       - key: DATABASE_SSL
         value: true
       - key: JWT_SECRET
-        sync: false
+        generateValue: true
       - key: DATABASE_URL
-        sync: false
+        fromDatabase:
+          name: app-scholar-db
+          property: connectionString
+
+databases:
+  - name: app-scholar-db
+    plan: free
+    databaseName: app_scholar
+    user: app_scholar_user
+    region: oregon

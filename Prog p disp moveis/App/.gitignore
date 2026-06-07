@@ -53,6 +53,7 @@ yarn.lock
 
 # Misc
 .expo/
+.tools/
 .cache/
 .next/
 out/
