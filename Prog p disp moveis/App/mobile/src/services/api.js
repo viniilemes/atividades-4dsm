@@ -1,14 +1,9 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Platform } from 'react-native';
 
 const ENV_API_URL = process.env.EXPO_PUBLIC_API_URL;
 
-const BASE_URL = ENV_API_URL || Platform.select({
-  android: 'http://10.0.2.2:3000/api',
-  ios: 'http://localhost:3000/api',
-  default: 'http://localhost:3000/api',
-});
+const BASE_URL = ENV_API_URL || 'https://NOME-DO-BACKEND.onrender.com/api';
 
 export const api = axios.create({
   baseURL: BASE_URL,

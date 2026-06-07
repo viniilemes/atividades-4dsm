@@ -1,7 +1,8 @@
 ### App Scholar - API Requests
 
 ## Base URL
-@baseUrl = http://localhost:3000/api
+@host = https://NOME-DO-BACKEND.onrender.com
+@baseUrl = {{host}}/api
 
 ## ===== AUTHENTICATION =====
 
@@ -123,12 +124,12 @@ Authorization: Bearer YOUR_TOKEN_HERE
 ## ===== HEALTH CHECK =====
 
 ### Health check
-GET http://localhost:3000/health
+GET {{host}}/health
 
 ## ===== EXTERNAL APIS (ViaCEP + IBGE) =====
 
 ### Search CEP (ViaCEP)
-POST http://localhost:3000/api/localizacao/cep
+POST {{baseUrl}}/localizacao/cep
 Content-Type: application/json
 
 {
@@ -136,7 +137,7 @@ Content-Type: application/json
 }
 
 ### List Estados (IBGE)
-GET http://localhost:3000/api/localizacao/estados
+GET {{baseUrl}}/localizacao/estados
 
 ### List Cidades by Estado (IBGE)
-GET http://localhost:3000/api/localizacao/estados/35/cidades
+GET {{baseUrl}}/localizacao/estados/35/cidades

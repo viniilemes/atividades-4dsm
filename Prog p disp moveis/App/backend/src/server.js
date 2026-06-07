@@ -7,11 +7,5 @@ const PORT = process.env.PORT || 3000;
 const HOST = process.env.HOST || '0.0.0.0';
 
 app.listen(PORT, HOST, () => {
-  console.log(`
-╔════════════════════════════════════════╗
-║  🚀 APP SCHOLAR BACKEND INICIADO      ║
-║  🌐 http://localhost:${PORT}                    ║
-║  ⏰ ${new Date().toLocaleString('pt-BR')}     ║
-╚════════════════════════════════════════╝
-  `);
+  console.log(`App Scholar backend listening on ${HOST}:${PORT}`);
 });

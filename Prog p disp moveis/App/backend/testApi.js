@@ -1,18 +1,33 @@
 import http from 'http';
+import https from 'https';
 
-function makeRequest(path, method, data) {
+const API_BASE_URL = process.env.API_BASE_URL || 'http://localhost:3000';
+
+function makeRequest(path, method, data, token) {
   return new Promise((resolve, reject) => {
+    const url = new URL(path, API_BASE_URL);
+    const client = url.protocol === 'https:' ? https : http;
+    const body = data ? JSON.stringify(data) : null;
+
     const options = {
-      hostname: 'localhost',
-      port: 3000,
-      path: `/api${path}`,
-      method: method,
+      hostname: url.hostname,
+      port: url.port || (url.protocol === 'https:' ? 443 : 80),
+      path: `${url.pathname}${url.search}`,
+      method,
       headers: {
         'Content-Type': 'application/json',
-      }
+      },
     };
 
-    const req = http.request(options, (res) => {
+    if (token) {
+      options.headers.Authorization = `Bearer ${token}`;
+    }
+
+    if (body) {
+      options.headers['Content-Length'] = Buffer.byteLength(body);
+    }
+
+    const req = client.request(options, (res) => {
       let responseData = '';
       res.on('data', (chunk) => {
         responseData += chunk;
@@ -22,97 +37,57 @@ function makeRequest(path, method, data) {
           resolve({
             status: res.statusCode,
             headers: res.headers,
-            body: JSON.parse(responseData)
+            body: JSON.parse(responseData),
           });
-        } catch (e) {
+        } catch {
           resolve({
             status: res.statusCode,
             headers: res.headers,
-            body: responseData
+            body: responseData,
           });
         }
       });
     });
 
     req.on('error', reject);
-    if (data) {
-      req.write(JSON.stringify(data));
+    if (body) {
+      req.write(body);
     }
     req.end();
   });
 }
 
 async function runTests() {
-  console.log('🧪 INICIANDO TESTES DE API\n');
+  console.log(`Testing API at ${API_BASE_URL}`);
 
-  // Teste 1: Health Check
-  console.log('📌 Teste 1: Health Check');
-  try {
-    const health = await makeRequest('/health', 'GET', null);
-    console.log(`Status: ${health.status}`);
-    console.log(`Resposta:`, health.body);
-  } catch (e) {
-    console.log('❌ Erro:', e.message);
-  }
-  console.log('');
+  const health = await makeRequest('/health', 'GET');
+  console.log('GET /health:', health.status, health.body);
 
-  // Teste 2: Login Admin
-  console.log('📌 Teste 2: Login Admin (admin@email.com / 123456)');
-  try {
-    const login = await makeRequest('/auth/login', 'POST', {
-      email: 'admin@email.com',
-      password: '123456'
-    });
-    console.log(`Status: ${login.status}`);
-    console.log(`Resposta:`, login.body);
-  } catch (e) {
-    console.log('❌ Erro:', e.message);
-  }
-  console.log('');
+  const login = await makeRequest('/api/auth/login', 'POST', {
+    email: process.env.TEST_ADMIN_EMAIL || 'admin@email.com',
+    password: process.env.TEST_ADMIN_PASSWORD || '123456',
+  });
+  console.log('POST /api/auth/login:', login.status, login.body);
 
-  // Teste 3: Registro Novo Usuário
-  console.log('📌 Teste 3: Registro Novo Usuário');
-  try {
-    const register = await makeRequest('/auth/register', 'POST', {
-      name: 'Maria Silva',
-      email: 'maria.silva@example.com',
-      password: 'senha123'
-    });
-    console.log(`Status: ${register.status}`);
-    console.log(`Resposta:`, register.body);
-  } catch (e) {
-    console.log('❌ Erro:', e.message);
-  }
-  console.log('');
-
-  // Teste 4: Login Novo Usuário
-  console.log('📌 Teste 4: Login Novo Usuário');
-  try {
-    const login = await makeRequest('/auth/login', 'POST', {
-      email: 'maria.silva@example.com',
-      password: 'senha123'
-    });
-    console.log(`Status: ${login.status}`);
-    console.log(`Resposta:`, login.body);
-  } catch (e) {
-    console.log('❌ Erro:', e.message);
-  }
-  console.log('');
-
-  // Teste 5: Email Inválido
-  console.log('📌 Teste 5: Email Inválido');
-  try {
-    const login = await makeRequest('/auth/login', 'POST', {
-      email: 'email-invalido',
-      password: '123456'
-    });
-    console.log(`Status: ${login.status}`);
-    console.log(`Resposta:`, login.body);
-  } catch (e) {
-    console.log('❌ Erro:', e.message);
+  const token = login.body?.token;
+  if (!token) {
+    throw new Error('Login did not return a token. Protected route tests skipped.');
   }
 
-  process.exit(0);
+  const routes = [
+    ['/api/alunos', 'GET'],
+    ['/api/professores', 'GET'],
+    ['/api/disciplinas', 'GET'],
+    ['/api/boletim/MAT001', 'GET'],
+  ];
+
+  for (const [path, method] of routes) {
+    const response = await makeRequest(path, method, null, token);
+    console.log(`${method} ${path}:`, response.status, response.body);
+  }
 }
 
-runTests();
+runTests().catch((error) => {
+  console.error('API test failed:', error.message);
+  process.exitCode = 1;
+});
