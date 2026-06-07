@@ -1,7 +1,7 @@
 ### App Scholar - API Requests
 
 ## Base URL
-@host = https://NOME-DO-BACKEND.onrender.com
+@host = https://app-scholar-backend-sfcs.onrender.com
 @baseUrl = {{host}}/api
 
 ## ===== AUTHENTICATION =====

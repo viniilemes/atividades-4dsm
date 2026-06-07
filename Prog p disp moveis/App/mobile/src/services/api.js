@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ENV_API_URL = process.env.EXPO_PUBLIC_API_URL;
 
-const BASE_URL = ENV_API_URL || 'https://NOME-DO-BACKEND.onrender.com/api';
+const BASE_URL = ENV_API_URL || 'https://app-scholar-backend-sfcs.onrender.com/api';
 
 export const api = axios.create({
   baseURL: BASE_URL,
