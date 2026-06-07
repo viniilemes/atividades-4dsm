@@ -3,7 +3,8 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const ENV_API_URL = process.env.EXPO_PUBLIC_API_URL;
 
-const BASE_URL = ENV_API_URL || 'https://app-scholar-backend-sfcs.onrender.com/api';
+export const BASE_URL = ENV_API_URL || 'https://app-scholar-backend-sfcs.onrender.com/api';
+export const LOGIN_ROUTE = '/auth/login';
 
 export const api = axios.create({
   baseURL: BASE_URL,
@@ -37,7 +38,7 @@ api.interceptors.response.use(
 
 export const authService = {
   login: (email, password) =>
-    api.post('/auth/login', { email, password }),
+    api.post(LOGIN_ROUTE, { email: email.trim(), password: password.trim() }),
   register: (name, email, password, role, profile = {}) =>
     api.post('/auth/register', { name, email, password, role, ...profile }),
   createUser: (data) => api.post('/auth/register', data),

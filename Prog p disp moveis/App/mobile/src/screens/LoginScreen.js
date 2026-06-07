@@ -22,18 +22,21 @@ export default function LoginScreen() {
   const { colors } = useContext(ThemeContext);
 
   const handleLogin = async () => {
-    if (!email || !password) {
+    const trimmedEmail = email.trim();
+    const trimmedPassword = password.trim();
+
+    if (!trimmedEmail || !trimmedPassword) {
       Alert.alert('Erro', 'Preencha todos os campos');
       return;
     }
 
-    if (!emailRegex.test(email.trim())) {
+    if (!emailRegex.test(trimmedEmail)) {
       Alert.alert('Erro', 'Informe um email valido');
       return;
     }
 
     try {
-      await login(email.trim(), password);
+      await login(trimmedEmail, trimmedPassword);
     } catch (error) {
       Alert.alert('Erro de Login', error.message);
     }
