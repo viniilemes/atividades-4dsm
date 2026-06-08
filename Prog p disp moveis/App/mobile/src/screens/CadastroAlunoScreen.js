@@ -1,4 +1,4 @@
-import { useState, useEffect, useContext } from 'react';
+import { useState, useContext } from 'react';
 import {
   View,
   Text,
@@ -8,16 +8,11 @@ import {
   TouchableOpacity,
   ActivityIndicator,
   Alert,
-  FlatList,
-  Modal,
 } from 'react-native';
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { externalApisService } from '../services/externalApis';
 import { authService } from '../services/api';
-import { AuthContext } from '../context/AuthContext';
 import { ThemeContext } from '../context/ThemeContext';
-
-const cidadesCache = new Map();
 
 export default function CadastroAlunoScreen({ navigation }) {
   const { colors } = useContext(ThemeContext);
@@ -35,54 +30,17 @@ export default function CadastroAlunoScreen({ navigation }) {
 
   const [loading, setLoading] = useState(false);
   const [cepLoading, setCepLoading] = useState(false);
-  const [estados, setEstados] = useState([]);
-  const [cidades, setCidades] = useState([]);
-  const [estadoSelecionado, setEstadoSelecionado] = useState(null);
-  const [cidadeSelecionada, setCidadeSelecionada] = useState(null);
+  const [lastCepSearched, setLastCepSearched] = useState('');
 
-  const [showEstadosModal, setShowEstadosModal] = useState(false);
-  const [showCidadesModal, setShowCidadesModal] = useState(false);
-
-  useEffect(() => {
-    carregarEstados();
-  }, []);
-
-  const carregarEstados = async () => {
-    try {
-      setLoading(true);
-      const response = await externalApisService.getEstados();
-      setEstados(response);
-    } catch (error) {
-      Alert.alert('Erro', 'Falha ao carregar estados');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const carregarCidades = async (estadoId) => {
-    try {
-      const cachedCidades = cidadesCache.get(estadoId);
-      if (cachedCidades) {
-        setCidades(cachedCidades);
-        return;
-      }
-
-      setLoading(true);
-      const response = await externalApisService.getCidadesByEstado(estadoId);
-      cidadesCache.set(estadoId, response);
-      setCidades(response);
-    } catch (error) {
-      Alert.alert('Erro', 'Falha ao carregar cidades');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSearchCEP = async () => {
-    const cleanCep = cep.replace(/\D/g, '');
+  const handleSearchCEP = async (cepValue = cep) => {
+    const cleanCep = cepValue.replace(/\D/g, '');
 
     if (!cleanCep || cleanCep.length !== 8) {
       Alert.alert('Erro', 'CEP inválido');
+      return;
+    }
+
+    if (cepLoading || cleanCep === lastCepSearched) {
       return;
     }
 
@@ -93,61 +51,28 @@ export default function CadastroAlunoScreen({ navigation }) {
       setCidade(response.localidade);
       setEstado(response.uf);
       setCep(cleanCep);
-
-      let estadosDisponiveis = estados;
-      if (estadosDisponiveis.length === 0) {
-        estadosDisponiveis = await externalApisService.getEstados();
-        setEstados(estadosDisponiveis);
-      }
-
-      const estadoEncontrado = estadosDisponiveis.find((est) => est.sigla === response.uf);
-      if (estadoEncontrado) {
-        setEstadoSelecionado(estadoEncontrado);
-        await carregarCidades(estadoEncontrado.id);
-      }
+      setLastCepSearched(cleanCep);
     } catch (error) {
+      setLastCepSearched('');
       Alert.alert('Erro', error.message);
     } finally {
       setCepLoading(false);
     }
   };
 
-  const handleSelecionarEstado = (est) => {
-    setEstadoSelecionado(est);
-    setEstado(est.sigla);
-    setCidade('');
-    setCidadeSelecionada(null);
-    setCidades([]);
-    carregarCidades(est.id);
-    setShowEstadosModal(false);
-  };
+  const handleCepChange = (value) => {
+    const cleanCep = value.replace(/\D/g, '').slice(0, 8);
+    setCep(cleanCep);
 
-  const handleSelecionarCidade = (cid) => {
-    setCidadeSelecionada(cid);
-    setCidade(cid.nome);
-    setShowCidadesModal(false);
-  };
-
-  const handleAbrirCidades = async () => {
-    if (!estado) {
-      Alert.alert('Erro', 'Selecione um estado primeiro');
+    if (cleanCep.length < 8) {
+      setLastCepSearched('');
+      setEndereco('');
+      setCidade('');
+      setEstado('');
       return;
     }
 
-    let estadosDisponiveis = estados;
-    if (estadosDisponiveis.length === 0) {
-      estadosDisponiveis = await externalApisService.getEstados();
-      setEstados(estadosDisponiveis);
-    }
-
-    const estadoParaBuscar =
-      estadoSelecionado || estadosDisponiveis.find((est) => est.sigla === estado);
-
-    if (estadoParaBuscar && cidades.length === 0) {
-      await carregarCidades(estadoParaBuscar.id);
-    }
-
-    setShowCidadesModal(true);
+    handleSearchCEP(cleanCep);
   };
 
   const handleCadastro = async () => {
@@ -298,28 +223,26 @@ export default function CadastroAlunoScreen({ navigation }) {
         {/* CEP com busca ViaCEP */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>CEP</Text>
-          <View style={styles.cepContainer}>
-            <View style={[styles.inputWrapper, styles.cepInputWrapper]}>
-              <MaterialCommunityIcons name="map-marker" size={20} color="#666" />
-              <TextInput
-                style={styles.input}
-                placeholder="12345000"
-                keyboardType="numeric"
-                value={cep}
-                onChangeText={(value) => setCep(value.replace(/\D/g, ''))}
-                editable={!cepLoading}
-                maxLength={8}
-              />
-            </View>
+          <View style={styles.inputWrapper}>
+            <MaterialCommunityIcons name="map-marker" size={20} color="#666" />
+            <TextInput
+              style={styles.input}
+              placeholder="Digite 8 numeros"
+              keyboardType="numeric"
+              value={cep}
+              onChangeText={handleCepChange}
+              editable={!cepLoading}
+              maxLength={8}
+            />
             <TouchableOpacity
-              style={[styles.searchButton, cepLoading && styles.buttonDisabled]}
+              style={[styles.searchInsideButton, cepLoading && styles.buttonDisabled]}
               onPress={handleSearchCEP}
               disabled={cepLoading}
             >
               {cepLoading ? (
                 <ActivityIndicator color="#fff" size="small" />
               ) : (
-                <MaterialCommunityIcons name="magnify" size={20} color="#fff" />
+                <MaterialCommunityIcons name="magnify" size={20} color="#4A90E2" />
               )}
             </TouchableOpacity>
           </View>
@@ -332,43 +255,39 @@ export default function CadastroAlunoScreen({ navigation }) {
             <MaterialCommunityIcons name="home" size={20} color="#666" />
             <TextInput
               style={styles.input}
-              placeholder="Rua/Avenida"
+              placeholder="Preenchido pelo CEP"
               value={endereco}
-              onChangeText={setEndereco}
+              editable={false}
             />
           </View>
         </View>
 
-        {/* Estado com dropdown IBGE */}
+        {/* Estado preenchido pelo CEP */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Estado</Text>
-          <TouchableOpacity
-            style={styles.dropdownButton}
-            onPress={() => setShowEstadosModal(true)}
-            disabled={loading}
-          >
+          <View style={styles.inputWrapper}>
             <MaterialCommunityIcons name="map" size={20} color="#666" />
-            <Text style={[styles.dropdownText, !estado && styles.placeholder]}>
-              {estado || 'Selecione um estado'}
-            </Text>
-            <MaterialCommunityIcons name="chevron-down" size={20} color="#666" />
-          </TouchableOpacity>
+            <TextInput
+              style={styles.input}
+              placeholder="Preenchido pelo CEP"
+              value={estado}
+              editable={false}
+            />
+          </View>
         </View>
 
-        {/* Cidade com dropdown IBGE */}
+        {/* Cidade preenchida pelo CEP */}
         <View style={styles.inputContainer}>
           <Text style={styles.label}>Cidade</Text>
-          <TouchableOpacity
-            style={styles.dropdownButton}
-            onPress={handleAbrirCidades}
-            disabled={loading || !estado}
-          >
+          <View style={styles.inputWrapper}>
             <MaterialCommunityIcons name="city" size={20} color="#666" />
-            <Text style={[styles.dropdownText, !cidade && styles.placeholder]}>
-              {cidade || 'Selecione uma cidade'}
-            </Text>
-            <MaterialCommunityIcons name="chevron-down" size={20} color="#666" />
-          </TouchableOpacity>
+            <TextInput
+              style={styles.input}
+              placeholder="Preenchida pelo CEP"
+              value={cidade}
+              editable={false}
+            />
+          </View>
         </View>
 
         {/* Curso */}
@@ -403,59 +322,6 @@ export default function CadastroAlunoScreen({ navigation }) {
         </TouchableOpacity>
       </View>
 
-      {/* Modal Estados */}
-      <Modal visible={showEstadosModal} transparent animationType="slide">
-        <View style={styles.modalContainer}>
-          <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
-            <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: colors.text }]}>Selecione um Estado</Text>
-              <TouchableOpacity onPress={() => setShowEstadosModal(false)}>
-                <MaterialCommunityIcons name="close" size={24} color={colors.text} />
-              </TouchableOpacity>
-            </View>
-            <FlatList
-              data={estados}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.modalOption}
-                  onPress={() => handleSelecionarEstado(item)}
-                >
-                  <Text style={[styles.modalOptionText, { color: colors.text }]}>{item.nome}</Text>
-                </TouchableOpacity>
-              )}
-              keyExtractor={(item) => item.id.toString()}
-              scrollEnabled
-            />
-          </View>
-        </View>
-      </Modal>
-
-      {/* Modal Cidades */}
-      <Modal visible={showCidadesModal} transparent animationType="slide">
-        <View style={styles.modalContainer}>
-          <View style={[styles.modalContent, { backgroundColor: colors.surface }]}>
-            <View style={styles.modalHeader}>
-              <Text style={[styles.modalTitle, { color: colors.text }]}>Selecione uma Cidade</Text>
-              <TouchableOpacity onPress={() => setShowCidadesModal(false)}>
-                <MaterialCommunityIcons name="close" size={24} color={colors.text} />
-              </TouchableOpacity>
-            </View>
-            <FlatList
-              data={cidades}
-              renderItem={({ item }) => (
-                <TouchableOpacity
-                  style={styles.modalOption}
-                  onPress={() => handleSelecionarCidade(item)}
-                >
-                  <Text style={[styles.modalOptionText, { color: colors.text }]}>{item.nome}</Text>
-                </TouchableOpacity>
-              )}
-              keyExtractor={(item) => item.id.toString()}
-              scrollEnabled
-            />
-          </View>
-        </View>
-      </Modal>
     </ScrollView>
   );
 }
@@ -511,41 +377,12 @@ const styles = StyleSheet.create({
     fontSize: 14,
     color: '#333',
   },
-  cepContainer: {
-    flexDirection: 'row',
-    gap: 8,
-    alignItems: 'center',
-  },
-  cepInputWrapper: {
-    flex: 1,
-    minWidth: 0,
-  },
-  searchButton: {
-    width: 48,
-    height: 48,
+  searchInsideButton: {
+    width: 40,
+    height: 40,
     borderRadius: 8,
-    backgroundColor: '#4A90E2',
     justifyContent: 'center',
     alignItems: 'center',
-  },
-  dropdownButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    paddingHorizontal: 12,
-    paddingVertical: 12,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-  },
-  dropdownText: {
-    flex: 1,
-    marginHorizontal: 8,
-    fontSize: 14,
-    color: '#333',
-  },
-  placeholder: {
-    color: '#999',
   },
   cadastroButton: {
     backgroundColor: '#4CAF50',
@@ -564,41 +401,5 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
-  },
-  modalContainer: {
-    flex: 1,
-    backgroundColor: 'rgba(0,0,0,0.5)',
-    justifyContent: 'center',
-    padding: 16,
-  },
-  modalContent: {
-    backgroundColor: '#fff',
-    borderRadius: 8,
-    maxHeight: '85%',
-    minHeight: 320,
-  },
-  modalHeader: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-    borderBottomWidth: 1,
-    borderBottomColor: '#e0e0e0',
-  },
-  modalTitle: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: '#333',
-  },
-  modalOption: {
-    paddingHorizontal: 16,
-    paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: '#f0f0f0',
-  },
-  modalOptionText: {
-    fontSize: 14,
-    color: '#333',
   },
 });
