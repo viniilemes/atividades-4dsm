@@ -1,6 +1,7 @@
 import { pool } from './src/config/db.js';
 
 const migrations = [
+  `ALTER TABLE alunos ADD COLUMN IF NOT EXISTS cpf VARCHAR(20)`,
   `ALTER TABLE alunos ADD COLUMN IF NOT EXISTS cep VARCHAR(20)`,
   `ALTER TABLE alunos ADD COLUMN IF NOT EXISTS endereco VARCHAR(255)`,
   `ALTER TABLE alunos ADD COLUMN IF NOT EXISTS cidade VARCHAR(100)`,

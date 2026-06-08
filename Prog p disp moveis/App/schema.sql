@@ -17,6 +17,7 @@ CREATE TABLE alunos (
   email VARCHAR(255) NOT NULL,
   data_nascimento DATE,
   telefone VARCHAR(20),
+  cpf VARCHAR(20),
   cep VARCHAR(20),
   endereco VARCHAR(255),
   cidade VARCHAR(100),

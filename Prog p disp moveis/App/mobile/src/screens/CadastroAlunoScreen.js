@@ -26,6 +26,7 @@ export default function CadastroAlunoScreen({ navigation }) {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [telefone, setTelefone] = useState('');
+  const [cpf, setCpf] = useState('');
   const [cep, setCep] = useState('');
   const [endereco, setEndereco] = useState('');
   const [cidade, setCidade] = useState('');
@@ -47,11 +48,6 @@ export default function CadastroAlunoScreen({ navigation }) {
   }, []);
 
   const carregarEstados = async () => {
-    if (password.length < 6) {
-      Alert.alert('Erro', 'A senha deve ter pelo menos 6 caracteres');
-      return;
-    }
-
     try {
       setLoading(true);
       const response = await externalApisService.getEstados();
@@ -120,6 +116,11 @@ export default function CadastroAlunoScreen({ navigation }) {
       return;
     }
 
+    if (password.length < 6) {
+      Alert.alert('Erro', 'A senha deve ter pelo menos 6 caracteres');
+      return;
+    }
+
     try {
       setLoading(true);
       await authService.createUser({
@@ -129,6 +130,7 @@ export default function CadastroAlunoScreen({ navigation }) {
         email,
         password,
         telefone,
+        cpf,
         cep,
         endereco,
         cidade,
@@ -232,6 +234,23 @@ export default function CadastroAlunoScreen({ navigation }) {
               value={telefone}
               onChangeText={setTelefone}
               editable={!loading}
+            />
+          </View>
+        </View>
+
+        {/* CPF */}
+        <View style={styles.inputContainer}>
+          <Text style={styles.label}>CPF</Text>
+          <View style={styles.inputWrapper}>
+            <MaterialCommunityIcons name="card-account-details" size={20} color="#666" />
+            <TextInput
+              style={styles.input}
+              placeholder="12345678900"
+              keyboardType="numeric"
+              value={cpf}
+              onChangeText={setCpf}
+              editable={!loading}
+              maxLength={14}
             />
           </View>
         </View>
