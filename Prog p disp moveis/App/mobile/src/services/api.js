@@ -75,3 +75,10 @@ export const boletimService = {
   getByMatricula: (matricula) => api.get(`/boletim/${matricula}`),
   addGrade: (data) => api.post('/boletim/grades', data),
 };
+
+export const professorNotasService = {
+  listDisciplinas: () => api.get('/professor/disciplinas'),
+  listAlunosByDisciplina: (disciplinaId) =>
+    api.get(`/professor/disciplinas/${disciplinaId}/alunos`),
+  saveGrade: (data) => api.post('/professor/notas', data),
+};

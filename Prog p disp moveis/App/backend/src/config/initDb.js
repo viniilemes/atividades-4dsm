@@ -48,6 +48,15 @@ CREATE TABLE IF NOT EXISTS disciplinas (
   updated_at TIMESTAMP DEFAULT NOW()
 );
 
+CREATE TABLE IF NOT EXISTS matriculas_disciplinas (
+  id SERIAL PRIMARY KEY,
+  aluno_id INT NOT NULL REFERENCES alunos(id) ON DELETE CASCADE,
+  disciplina_id INT NOT NULL REFERENCES disciplinas(id) ON DELETE CASCADE,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW(),
+  UNIQUE(aluno_id, disciplina_id)
+);
+
 CREATE TABLE IF NOT EXISTS grades (
   id SERIAL PRIMARY KEY,
   aluno_id INT NOT NULL REFERENCES alunos(id) ON DELETE CASCADE,
@@ -71,11 +80,18 @@ CREATE UNIQUE INDEX IF NOT EXISTS idx_users_email_lower ON users(LOWER(email));
 CREATE INDEX IF NOT EXISTS idx_alunos_matricula ON alunos(matricula);
 CREATE INDEX IF NOT EXISTS idx_alunos_email ON alunos(email);
 CREATE INDEX IF NOT EXISTS idx_disciplinas_codigo ON disciplinas(codigo);
+CREATE INDEX IF NOT EXISTS idx_matriculas_aluno ON matriculas_disciplinas(aluno_id);
+CREATE INDEX IF NOT EXISTS idx_matriculas_disciplina ON matriculas_disciplinas(disciplina_id);
 CREATE INDEX IF NOT EXISTS idx_grades_aluno ON grades(aluno_id);
 CREATE INDEX IF NOT EXISTS idx_grades_disciplina ON grades(disciplina_id);
 
 INSERT INTO users (name, email, password, role) VALUES
 ('Admin User', 'admin@email.com', '$2b$10$bZx8V.wwvHDDtnD0K4exkOyP0D1w1VcvJAp.9A.cDzRgK.ZTkVZrG', 'admin')
+ON CONFLICT (email) DO NOTHING;
+
+INSERT INTO users (name, email, password, role) VALUES
+('Prof. Joao Silva', 'joao@email.com', '$2b$10$bZx8V.wwvHDDtnD0K4exkOyP0D1w1VcvJAp.9A.cDzRgK.ZTkVZrG', 'professor'),
+('Prof. Maria Santos', 'maria@email.com', '$2b$10$bZx8V.wwvHDDtnD0K4exkOyP0D1w1VcvJAp.9A.cDzRgK.ZTkVZrG', 'professor')
 ON CONFLICT (email) DO NOTHING;
 
 INSERT INTO professores (id, nome, email, especialidade) VALUES
@@ -93,6 +109,17 @@ INSERT INTO alunos (id, nome, matricula, email, data_nascimento) VALUES
 (2, 'Maria Silva', 'MAT002', 'maria@student.com', '2003-08-22')
 ON CONFLICT (id) DO NOTHING;
 
+INSERT INTO matriculas_disciplinas (aluno_id, disciplina_id) VALUES
+(1, 1),
+(1, 2),
+(2, 1),
+(2, 2)
+ON CONFLICT (aluno_id, disciplina_id) DO NOTHING;
+
+INSERT INTO matriculas_disciplinas (aluno_id, disciplina_id)
+SELECT aluno_id, disciplina_id FROM grades
+ON CONFLICT (aluno_id, disciplina_id) DO NOTHING;
+
 INSERT INTO grades (aluno_id, disciplina_id, nota1, nota2) VALUES
 (1, 1, 8.5, 7.5),
 (1, 2, 9.0, 8.5),
@@ -104,6 +131,7 @@ SELECT setval(pg_get_serial_sequence('users', 'id'), COALESCE((SELECT MAX(id) FR
 SELECT setval(pg_get_serial_sequence('alunos', 'id'), COALESCE((SELECT MAX(id) FROM alunos), 1), true);
 SELECT setval(pg_get_serial_sequence('professores', 'id'), COALESCE((SELECT MAX(id) FROM professores), 1), true);
 SELECT setval(pg_get_serial_sequence('disciplinas', 'id'), COALESCE((SELECT MAX(id) FROM disciplinas), 1), true);
+SELECT setval(pg_get_serial_sequence('matriculas_disciplinas', 'id'), COALESCE((SELECT MAX(id) FROM matriculas_disciplinas), 1), true);
 SELECT setval(pg_get_serial_sequence('grades', 'id'), COALESCE((SELECT MAX(id) FROM grades), 1), true);
 `;
 

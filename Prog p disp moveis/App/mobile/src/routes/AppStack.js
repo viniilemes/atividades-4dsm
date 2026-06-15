@@ -21,6 +21,9 @@ import CadastroDisciplinaScreen from '../screens/CadastroDisciplinaScreen';
 import ProfessoresScreen from '../screens/ProfessoresScreen';
 import CadastroProfessorScreen from '../screens/CadastroProfessorScreen';
 import ProfessorDetalhesScreen from '../screens/ProfessorDetalhesScreen';
+import ProfessorDisciplinasNotasScreen from '../screens/ProfessorDisciplinasNotasScreen';
+import ProfessorDisciplinaAlunosScreen from '../screens/ProfessorDisciplinaAlunosScreen';
+import LancamentoNotaScreen from '../screens/LancamentoNotaScreen';
 
 const Stack = createNativeStackNavigator();
 const Tab = createBottomTabNavigator();
@@ -132,6 +135,30 @@ function ProfessoresStack() {
   );
 }
 
+function LancamentoNotasStack() {
+  const { colors } = useContext(ThemeContext);
+
+  return (
+    <Stack.Navigator screenOptions={getStackScreenOptions(colors)}>
+      <Stack.Screen
+        name="ProfessorDisciplinasNotas"
+        component={ProfessorDisciplinasNotasScreen}
+        options={{ title: 'Minhas Disciplinas' }}
+      />
+      <Stack.Screen
+        name="ProfessorDisciplinaAlunos"
+        component={ProfessorDisciplinaAlunosScreen}
+        options={{ title: 'Alunos da Disciplina' }}
+      />
+      <Stack.Screen
+        name="LancamentoNota"
+        component={LancamentoNotaScreen}
+        options={{ title: 'Lançar Notas' }}
+      />
+    </Stack.Navigator>
+  );
+}
+
 function ProfileStack() {
   const { colors } = useContext(ThemeContext);
 
@@ -171,6 +198,7 @@ export function AppStack() {
   const { user } = useContext(AuthContext);
   const canManageAcademicData = ['admin', 'professor'].includes(user?.role);
   const isAdmin = user?.role === 'admin';
+  const isProfessor = user?.role === 'professor';
 
   return (
     <Tab.Navigator
@@ -226,6 +254,18 @@ export function AppStack() {
             tabBarLabel: 'Disciplinas',
             tabBarIcon: ({ color, size }) => (
               <MaterialCommunityIcons name="book" size={size} color={color} />
+            ),
+          }}
+        />
+      )}
+      {isProfessor && (
+        <Tab.Screen
+          name="LancamentoNotasTab"
+          component={LancamentoNotasStack}
+          options={{
+            tabBarLabel: 'Notas',
+            tabBarIcon: ({ color, size }) => (
+              <MaterialCommunityIcons name="clipboard-edit" size={size} color={color} />
             ),
           }}
         />

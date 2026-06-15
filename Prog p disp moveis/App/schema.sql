@@ -49,6 +49,16 @@ CREATE TABLE disciplinas (
   updated_at TIMESTAMP DEFAULT NOW()
 );
 
+-- Matriculas em disciplinas table
+CREATE TABLE matriculas_disciplinas (
+  id SERIAL PRIMARY KEY,
+  aluno_id INT NOT NULL REFERENCES alunos(id) ON DELETE CASCADE,
+  disciplina_id INT NOT NULL REFERENCES disciplinas(id) ON DELETE CASCADE,
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW(),
+  UNIQUE(aluno_id, disciplina_id)
+);
+
 -- Grades table (notas dos alunos)
 CREATE TABLE grades (
   id SERIAL PRIMARY KEY,
@@ -67,12 +77,19 @@ CREATE UNIQUE INDEX idx_users_email_lower ON users(LOWER(email));
 CREATE INDEX idx_alunos_matricula ON alunos(matricula);
 CREATE INDEX idx_alunos_email ON alunos(email);
 CREATE INDEX idx_disciplinas_codigo ON disciplinas(codigo);
+CREATE INDEX idx_matriculas_aluno ON matriculas_disciplinas(aluno_id);
+CREATE INDEX idx_matriculas_disciplina ON matriculas_disciplinas(disciplina_id);
 CREATE INDEX idx_grades_aluno ON grades(aluno_id);
 CREATE INDEX idx_grades_disciplina ON grades(disciplina_id);
 
 -- Insert default admin user
 INSERT INTO users (name, email, password, role) VALUES
 ('Admin User', 'admin@email.com', '$2b$10$bZx8V.wwvHDDtnD0K4exkOyP0D1w1VcvJAp.9A.cDzRgK.ZTkVZrG', 'admin');
+
+-- Insert default professor users
+INSERT INTO users (name, email, password, role) VALUES
+('Prof. João Silva', 'joao@email.com', '$2b$10$bZx8V.wwvHDDtnD0K4exkOyP0D1w1VcvJAp.9A.cDzRgK.ZTkVZrG', 'professor'),
+('Prof. Maria Santos', 'maria@email.com', '$2b$10$bZx8V.wwvHDDtnD0K4exkOyP0D1w1VcvJAp.9A.cDzRgK.ZTkVZrG', 'professor');
 
 -- Insert sample professors
 INSERT INTO professores (nome, email, especialidade) VALUES
@@ -88,6 +105,13 @@ INSERT INTO disciplinas (nome, codigo, carga_horaria, professor_id) VALUES
 INSERT INTO alunos (nome, matricula, email, data_nascimento) VALUES
 ('João Pedro', 'MAT001', 'joao@student.com', '2004-05-15'),
 ('Maria Silva', 'MAT002', 'maria@student.com', '2003-08-22');
+
+-- Insert sample enrollments
+INSERT INTO matriculas_disciplinas (aluno_id, disciplina_id) VALUES
+(1, 1),
+(1, 2),
+(2, 1),
+(2, 2);
 
 -- Insert sample grades
 INSERT INTO grades (aluno_id, disciplina_id, nota1, nota2) VALUES

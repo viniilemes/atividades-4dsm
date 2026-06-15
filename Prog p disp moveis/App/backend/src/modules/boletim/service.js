@@ -1,4 +1,10 @@
-import { getBoletimRepository, addGradeRepository } from './repository.js';
+import {
+  getBoletimRepository,
+  addGradeRepository,
+  getDisciplinasByProfessorEmailRepository,
+  getAlunosByDisciplinaForProfessorRepository,
+  addGradeForProfessorRepository
+} from './repository.js';
 import { calculateSituation } from '../../shared/utils/validators.js';
 
 export async function getBoletimService(matricula) {
@@ -45,4 +51,54 @@ export async function getBoletimService(matricula) {
 
 export async function addGradeService(data) {
   return await addGradeRepository(data);
+}
+
+export async function getProfessorDisciplinasService(professorEmail) {
+  return await getDisciplinasByProfessorEmailRepository(professorEmail);
+}
+
+export async function getProfessorDisciplinaAlunosService(disciplinaId, professorEmail) {
+  const alunos = await getAlunosByDisciplinaForProfessorRepository(disciplinaId, professorEmail);
+
+  if (!alunos || alunos.length === 0) {
+    return null;
+  }
+
+  const disciplinaData = alunos[0];
+
+  return {
+    disciplina: {
+      id: disciplinaData.disciplina_id,
+      nome: disciplinaData.disciplina_nome,
+      codigo: disciplinaData.disciplina_codigo
+    },
+    alunos: alunos.filter((item) => item.aluno_id).map((item) => {
+      const nota1 = item.nota1 === null || item.nota1 === undefined ? null : parseFloat(item.nota1);
+      const nota2 = item.nota2 === null || item.nota2 === undefined ? null : parseFloat(item.nota2);
+      const hasNotas = nota1 !== null && nota2 !== null;
+      const media = hasNotas ? (nota1 + nota2) / 2 : null;
+
+      return {
+        id: item.aluno_id,
+        nome: item.aluno_nome,
+        matricula: item.matricula,
+        email: item.email,
+        grade_id: item.grade_id,
+        nota1,
+        nota2,
+        media: media === null ? null : parseFloat(media.toFixed(2)),
+        situation: media === null ? 'Pendente' : calculateSituation(media)
+      };
+    })
+  };
+}
+
+export async function addGradeForProfessorService(data, professorEmail) {
+  const result = await addGradeForProfessorRepository(data, professorEmail);
+
+  if (!result) {
+    throw new Error('Disciplina não encontrada para este professor ou aluno não vinculado');
+  }
+
+  return result;
 }
